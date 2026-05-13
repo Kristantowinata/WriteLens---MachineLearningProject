@@ -1,0 +1,1393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WriteLens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0B12;
+    --bg-2:#0F0F18;
+    --surface:#15151F;
+    --surface-2:#1A1A26;
+    --border:#23232F;
+    --border-2:#2E2E3D;
+    --text:#E8E8ED;
+    --text-2:#A6A6B8;
+    --text-3:#6F6F85;
+    --accent:#4ECDC4;
+    --accent-glow:rgba(78,205,196,.18);
+    --amber:#F0C05A;
+    --human:#5EE0A0;
+    --ambig:#F0C05A;
+    --ai:#F47C7C;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+    --display:'Outfit', system-ui, sans-serif;
+    --body:'Inter', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--body);font-feature-settings:"ss01","cv11";-webkit-font-smoothing:antialiased}
+  body{min-height:100vh}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit}
+  ::selection{background:var(--accent-glow);color:var(--text)}
+
+  /* shared */
+  .container{max-width:1180px;margin:0 auto;padding:0 32px}
+  .display{font-family:var(--display);letter-spacing:-0.02em;line-height:1.05}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .muted{color:var(--text-2)}
+  .dim{color:var(--text-3)}
+
+  /* nav */
+  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(11,11,18,.72);border-bottom:1px solid var(--border)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-0.01em}
+  .brand-mark{width:22px;height:22px;border-radius:6px;background:radial-gradient(circle at 30% 30%,var(--accent),#2a8d86 70%);box-shadow:0 0 12px var(--accent-glow);position:relative}
+  .brand-mark::after{content:"";position:absolute;inset:5px;border-radius:50%;border:1.5px solid rgba(11,11,18,.85)}
+  .nav-links{display:flex;gap:4px}
+  .nav-link{padding:8px 14px;border-radius:8px;font-size:14px;color:var(--text-2);cursor:pointer;transition:color .15s,background .15s}
+  .nav-link:hover{color:var(--text);background:rgba(255,255,255,.03)}
+  .nav-link.active{color:var(--text);background:rgba(78,205,196,.08);box-shadow:inset 0 0 0 1px rgba(78,205,196,.18)}
+
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;font-weight:500;font-size:14px;border:1px solid transparent;cursor:pointer;transition:all .15s;font-family:inherit}
+  .btn-primary{background:var(--accent);color:#06201E;box-shadow:0 0 0 1px rgba(78,205,196,.4),0 8px 24px -8px rgba(78,205,196,.5)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 0 1px rgba(78,205,196,.5),0 12px 28px -8px rgba(78,205,196,.6)}
+  .btn-ghost{background:transparent;color:var(--text);border-color:var(--border-2)}
+  .btn-ghost:hover{background:rgba(255,255,255,.03);border-color:#3a3a4d}
+
+  /* cards */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px}
+  .card-pad{padding:24px}
+
+  /* footer */
+  .footer{border-top:1px solid var(--border);padding:32px 0;margin-top:96px;color:var(--text-3);font-size:13px}
+  .footer-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+
+  /* utilities */
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;font-size:12px;border:1px solid var(--border-2);color:var(--text-2);background:rgba(255,255,255,.02)}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+
+  /* page anim */
+  .page-enter{animation:pageIn .35s ease-out both}
+  @keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* hero glow */
+  .hero-glow{position:absolute;inset:auto;width:680px;height:680px;border-radius:50%;filter:blur(120px);opacity:.35;background:radial-gradient(circle,rgba(78,205,196,.55),transparent 60%);pointer-events:none}
+
+  /* tab */
+  .tabs{display:inline-flex;padding:4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;gap:2px}
+  .tab{padding:8px 14px;font-size:13px;color:var(--text-2);border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+  .tab.active{background:var(--surface-2);color:var(--text);box-shadow:inset 0 0 0 1px var(--border-2)}
+
+  /* textarea */
+  .ta{width:100%;min-height:240px;resize:vertical;background:var(--bg-2);border:1px solid var(--border);color:var(--text);font:14px/1.65 var(--body);padding:18px 20px;border-radius:12px;outline:none;transition:border-color .15s, box-shadow .15s}
+  .ta:focus{border-color:rgba(78,205,196,.45);box-shadow:0 0 0 4px rgba(78,205,196,.08)}
+  .ta::placeholder{color:var(--text-3)}
+
+  /* dropzone */
+  .dz{border:1.5px dashed var(--border-2);border-radius:12px;padding:48px 24px;text-align:center;background:var(--bg-2);color:var(--text-2);cursor:pointer;transition:all .15s}
+  .dz:hover, .dz.drag{border-color:var(--accent);background:rgba(78,205,196,.04);color:var(--text)}
+
+  /* progress ring */
+  .ring-wrap{display:flex;align-items:center;justify-content:center;position:relative}
+
+  /* feature row */
+  .feat{display:grid;grid-template-columns:1.6fr 1fr 2fr;gap:20px;align-items:center;padding:18px 0;border-bottom:1px solid var(--border)}
+  .feat:last-child{border-bottom:0}
+  .feat-name{font-size:14px;font-weight:500;color:var(--text)}
+  .feat-name small{display:block;color:var(--text-3);font-weight:400;font-size:12px;margin-top:3px}
+  .feat-val{font-family:var(--mono);font-size:15px;color:var(--text)}
+  .feat-val small{color:var(--text-3);font-size:11px;margin-left:6px}
+
+  /* range bar */
+  .range{position:relative;height:10px;border-radius:6px;background:linear-gradient(90deg,rgba(244,124,124,.18) 0% 38%,rgba(240,192,90,.18) 38% 62%,rgba(94,224,160,.18) 62% 100%);border:1px solid var(--border)}
+  .range .seg-h{position:absolute;top:-1px;bottom:-1px;border-radius:6px;background:rgba(94,224,160,.18);border:1px solid rgba(94,224,160,.4)}
+  .range .seg-a{position:absolute;top:-1px;bottom:-1px;border-radius:6px;background:rgba(244,124,124,.16);border:1px solid rgba(244,124,124,.35)}
+  .range .marker{position:absolute;top:-5px;width:3px;height:18px;border-radius:2px;background:var(--accent);box-shadow:0 0 10px var(--accent-glow)}
+  .range-legend{display:flex;justify-content:space-between;font-size:10.5px;color:var(--text-3);margin-top:6px;font-family:var(--mono)}
+
+  /* score badges */
+  .score-tag{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid}
+  .tag-human{color:var(--human);border-color:rgba(94,224,160,.35);background:rgba(94,224,160,.08)}
+  .tag-ambig{color:var(--ambig);border-color:rgba(240,192,90,.35);background:rgba(240,192,90,.08)}
+  .tag-ai{color:var(--ai);border-color:rgba(244,124,124,.35);background:rgba(244,124,124,.08)}
+
+  /* loading shimmer */
+  .shimmer{background:linear-gradient(90deg,var(--surface) 0%,var(--surface-2) 50%,var(--surface) 100%);background-size:200% 100%;animation:sh 1.4s infinite}
+  @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  /* accordion */
+  .acc{border-bottom:1px solid var(--border)}
+  .acc:last-child{border-bottom:0}
+  .acc-h{display:flex;justify-content:space-between;align-items:center;padding:18px 0;cursor:pointer}
+  .acc-h:hover{color:var(--accent)}
+  .chev{transition:transform .2s}
+  .chev.open{transform:rotate(90deg)}
+  .acc-b{max-height:0;overflow:hidden;transition:max-height .25s ease, padding .2s ease;color:var(--text-2);font-size:14px;line-height:1.65}
+  .acc-b.open{max-height:400px;padding:0 0 18px}
+
+  /* radar tooltip */
+  .legend-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2)}
+  .legend-sw{width:16px;height:3px;border-radius:2px}
+
+  /* insight */
+  .insight{display:flex;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:var(--surface);align-items:flex-start}
+  .insight-ico{flex-shrink:0;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+
+  /* avatar */
+  .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:14px;background:linear-gradient(135deg,#2a3a40,#1a2528);color:var(--accent);border:1px solid var(--border-2)}
+
+  /* link */
+  .link{color:var(--accent);cursor:pointer;border-bottom:1px solid rgba(78,205,196,.3)}
+  .link:hover{border-bottom-color:var(--accent)}
+
+  /* keyframes for spinner */
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.25);border-top-color:#06201E;border-radius:50%;animation:spin .7s linear infinite}
+
+  /* radar svg */
+  .radar-axis-label{font-family:var(--mono);font-size:10px;fill:var(--text-3)}
+
+  /* responsive-ish */
+  @media (max-width:880px){
+    .grid-3{grid-template-columns:1fr}
+    .grid-2{grid-template-columns:1fr}
+    .feat{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- tweaks-panel -->
+<script type="text/babel">
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
+    color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+  .twk-field{appearance:none;box-sizing:border-box;width:100%;min-width:0;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
+    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:14px;height:14px;border-radius:50%;background:#fff;
+    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
+    background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
+    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
+    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
+    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2}
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+  .twk-chips{display:flex;gap:6px}
+  .twk-chip{position:relative;appearance:none;flex:1;min-width:0;height:46px;
+    padding:0;border:0;border-radius:6px;overflow:hidden;cursor:default;
+    box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06);
+    transition:transform .12s,box-shadow .12s}
+  .twk-chip:hover{transform:translateY(-1px)}
+  .twk-chip[data-on="1"]{box-shadow:0 0 0 1.5px rgba(0,0,0,.85),0 2px 6px rgba(0,0,0,.15)}
+  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+`;
+
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(defaults);
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues((prev) => ({ ...prev, ...edits }));
+  }, []);
+  return [values, setTweak];
+}
+
+function TweaksPanel({ title = 'Tweaks', children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = React.useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = {
+        x: startRight - (ev.clientX - sx),
+        y: startBottom - (ev.clientY - sy),
+      };
+      clampToViewport();
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel"
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" onClick={() => setOpen(false)}>✕</button>
+        </div>
+        <div className="twk-body">{children}</div>
+      </div>
+    </>
+  );
+}
+
+function TweakSection({ label }) {
+  return <div className="twk-sect">{label}</div>;
+}
+
+function TweakRow({ label, value, children, inline = false }) {
+  return (
+    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
+      <div className="twk-lbl">
+        <span>{label}</span>
+        {value != null && <span className="twk-val">{value}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              onClick={() => onChange(!value)}><i /></button>
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, options, onChange }) {
+  const trackRef = React.useRef(null);
+  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
+  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
+  const n = opts.length;
+
+  const labelLen = (o) => String(typeof o === 'object' ? o.label : o).length;
+  const maxLen = options.reduce((m, o) => Math.max(m, labelLen(o)), 0);
+  const fitsAsSegments = maxLen <= ({ 2: 16, 3: 10 }[options.length] ?? 0);
+
+  if (!fitsAsSegments) {
+    return (
+      <TweakRow label={label}>
+        <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+          {opts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      </TweakRow>
+    );
+  }
+
+  return (
+    <TweakRow label={label}>
+      <div ref={trackRef} role="radiogroup" className="twk-seg">
+        <div className="twk-seg-thumb"
+             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
+                      width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map((o) => (
+          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}
+                  onClick={() => onChange(o.value)}>{o.label}</button>
+        ))}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakSelect({ label, value, options, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => {
+          const v = typeof o === 'object' ? o.value : o;
+          const l = typeof o === 'object' ? o.label : o;
+          return <option key={v} value={v}>{l}</option>;
+        })}
+      </select>
+    </TweakRow>
+  );
+}
+
+function TweakColor({ label, value, options, onChange }) {
+  if (!options || !options.length) {
+    return (
+      <div className="twk-row twk-row-h">
+        <div className="twk-lbl"><span>{label}</span></div>
+        <input type="color" className="twk-swatch" value={value}
+               onChange={(e) => onChange(e.target.value)} />
+      </div>
+    );
+  }
+  const key = (o) => String(JSON.stringify(o)).toLowerCase();
+  const cur = key(value);
+  const isLight = (hex) => {
+    const h = String(hex).replace('#', '');
+    const x = h.length === 3 ? h.replace(/./g, (c) => c + c) : h.padEnd(6, '0');
+    const n = parseInt(x.slice(0, 6), 16);
+    if (Number.isNaN(n)) return true;
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return r * 299 + g * 587 + b * 114 > 148000;
+  };
+  return (
+    <TweakRow label={label}>
+      <div className="twk-chips" role="radiogroup">
+        {options.map((o, i) => {
+          const colors = Array.isArray(o) ? o : [o];
+          const [hero] = colors;
+          const on = key(o) === cur;
+          return (
+            <button key={i} type="button" className="twk-chip" role="radio"
+                    data-on={on ? '1' : '0'} style={{ background: hero }}
+                    onClick={() => onChange(o)}>
+              {on && (
+                <svg viewBox="0 0 14 14" aria-hidden="true">
+                  <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2"
+                        strokeLinecap="round" strokeLinejoin="round"
+                        stroke={isLight(hero) ? 'rgba(0,0,0,.78)' : '#fff'} />
+                </svg>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </TweakRow>
+  );
+}
+
+Object.assign(window, {
+  useTweaks, TweaksPanel, TweakSection, TweakRow,
+  TweakToggle, TweakRadio, TweakSelect, TweakColor,
+});
+</script>
+
+<!-- icons -->
+<script type="text/babel">
+const Ico = ({ children, size = 18, ...p }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"
+       {...p}>{children}</svg>
+);
+
+const IcoUpload = (p) => <Ico {...p}><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></Ico>;
+const IcoSearch = (p) => <Ico {...p}><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.5-3.5"/></Ico>;
+const IcoChart  = (p) => <Ico {...p}><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4"/><path d="M12 15V8"/><path d="M16 15v-6"/></Ico>;
+const IcoArrow  = (p) => <Ico {...p}><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></Ico>;
+const IcoCheck  = (p) => <Ico {...p}><path d="m5 12 5 5 9-11"/></Ico>;
+const IcoWarn   = (p) => <Ico {...p}><path d="M12 9v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/><path d="M10.6 3.6 2.7 17.4A1.6 1.6 0 0 0 4.1 20h15.8a1.6 1.6 0 0 0 1.4-2.6L13.4 3.6a1.6 1.6 0 0 0-2.8 0Z"/></Ico>;
+const IcoInfo   = (p) => <Ico {...p}><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v5h1"/></Ico>;
+const IcoFile   = (p) => <Ico {...p}><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></Ico>;
+const IcoLens   = (p) => <Ico {...p}><circle cx="11" cy="11" r="7"/><circle cx="11" cy="11" r="3"/><path d="m20 20-3.5-3.5"/></Ico>;
+const IcoSpark  = (p) => <Ico {...p}><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></Ico>;
+const IcoGit    = (p) => <Ico {...p}><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.95 0-1.1.39-2 1.03-2.7-.1-.25-.45-1.28.1-2.66 0 0 .84-.27 2.75 1.03A9.5 9.5 0 0 1 12 6.8c.85.004 1.7.115 2.5.34 1.9-1.3 2.74-1.03 2.74-1.03.55 1.38.2 2.41.1 2.66.64.7 1.03 1.6 1.03 2.7 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.86v2.76c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></Ico>;
+const IcoX      = (p) => <Ico {...p}><path d="M6 6l12 12M18 6 6 18"/></Ico>;
+const IcoText   = (p) => <Ico {...p}><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></Ico>;
+const IcoClip   = (p) => <Ico {...p}><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></Ico>;
+
+Object.assign(window, {
+  Ico, IcoUpload, IcoSearch, IcoChart, IcoArrow, IcoCheck, IcoWarn, IcoInfo,
+  IcoFile, IcoLens, IcoSpark, IcoGit, IcoX, IcoText, IcoClip
+});
+</script>
+
+<!-- analyzer logic -->
+<script type="text/babel">
+function analyzeText(raw) {
+  const text = (raw || "").trim();
+  if (!text) return null;
+  const sentences = text.split(/[.!?]+(?:\s|$)/).map(s => s.trim()).filter(Boolean);
+  const words = text.match(/[A-Za-z']+/g) || [];
+  const wordCount = words.length;
+  const charCount = text.length;
+  const lowerWords = words.map(w => w.toLowerCase());
+  const uniqueWords = new Set(lowerWords);
+  const freq = {};
+  lowerWords.forEach(w => freq[w] = (freq[w] || 0) + 1);
+  const hapax = Object.values(freq).filter(c => c === 1).length;
+
+  const sentLens = sentences.map(s => (s.match(/[A-Za-z']+/g) || []).length).filter(n => n > 0);
+  const avgSent = sentLens.length ? sentLens.reduce((a,b)=>a+b,0)/sentLens.length : 0;
+  const meanSL = avgSent;
+  const variance = sentLens.length > 1
+    ? sentLens.reduce((a,b)=>a+Math.pow(b-meanSL,2),0)/sentLens.length
+    : 0;
+  const stdev = Math.sqrt(variance);
+
+  const punctCount = (text.match(/[.,;:!?\-—()"']/g) || []).length;
+  const punctDensity = wordCount ? punctCount / wordCount : 0;
+
+  const ttr = wordCount ? uniqueWords.size / wordCount : 0;
+  const hapaxRatio = wordCount ? hapax / wordCount : 0;
+
+  const stop = new Set(["the","a","an","and","or","but","of","to","in","on","at","for","with","is","are","was","were","be","been","being","have","has","had","do","does","did","i","you","he","she","it","we","they","this","that","these","those","by","as","not","from","so"]);
+  const stopCount = lowerWords.filter(w => stop.has(w)).length;
+  const stopRatio = wordCount ? stopCount / wordCount : 0;
+
+  const features = [
+    {
+      key: "asl", name: "Average Sentence Length",
+      desc: "Mean words per sentence",
+      value: avgSent, unit: "words", decimals: 1,
+      human: [14, 22], ai: [18, 26], scale: [5, 35]
+    },
+    {
+      key: "ttr", name: "Lexical Diversity (TTR)",
+      desc: "Unique words ÷ total words",
+      value: ttr, unit: "", decimals: 3,
+      human: [0.55, 0.78], ai: [0.38, 0.55], scale: [0.2, 0.9]
+    },
+    {
+      key: "hapax", name: "Vocabulary Richness",
+      desc: "Hapax legomena ratio",
+      value: hapaxRatio, unit: "", decimals: 3,
+      human: [0.42, 0.62], ai: [0.28, 0.44], scale: [0.15, 0.75]
+    },
+    {
+      key: "slv", name: "Sentence Length Variance",
+      desc: "Std. deviation of sentence length",
+      value: stdev, unit: "σ", decimals: 2,
+      human: [5, 12], ai: [2, 6], scale: [0, 16]
+    },
+    {
+      key: "punc", name: "Punctuation Density",
+      desc: "Punctuation marks ÷ words",
+      value: punctDensity, unit: "", decimals: 3,
+      human: [0.10, 0.18], ai: [0.08, 0.14], scale: [0, 0.25]
+    },
+    {
+      key: "func", name: "Function-Word Ratio",
+      desc: "Proportion of common stopwords",
+      value: stopRatio, unit: "", decimals: 3,
+      human: [0.38, 0.50], ai: [0.42, 0.55], scale: [0.2, 0.65]
+    }
+  ];
+
+  let aiVotes = 0, humanVotes = 0;
+  features.forEach(f => {
+    const inHuman = f.value >= f.human[0] && f.value <= f.human[1];
+    const inAI = f.value >= f.ai[0] && f.value <= f.ai[1];
+    if (inAI && !inHuman) aiVotes++;
+    else if (inHuman && !inAI) humanVotes++;
+    else if (inAI && inHuman) { aiVotes += 0.5; humanVotes += 0.5; }
+  });
+  const total = features.length;
+  const aiProb = Math.round(((aiVotes + 0.5) / (total + 1)) * 100);
+
+  return {
+    wordCount, charCount, sentenceCount: sentences.length,
+    features, aiProb
+  };
+}
+
+function RadarChart({ features, size = 360 }) {
+  const cx = size / 2, cy = size / 2;
+  const radius = size * 0.36;
+  const N = features.length;
+
+  const norm = (f, v) => {
+    const [lo, hi] = f.scale;
+    return Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
+  };
+
+  const pointAt = (i, r) => {
+    const angle = (Math.PI * 2 * i) / N - Math.PI / 2;
+    return [cx + Math.cos(angle) * r, cy + Math.sin(angle) * r];
+  };
+
+  const polygon = (vals) => vals.map((v, i) => pointAt(i, v * radius).join(",")).join(" ");
+
+  const userVals = features.map(f => norm(f, f.value));
+  const humanVals = features.map(f => norm(f, (f.human[0] + f.human[1]) / 2));
+  const aiVals = features.map(f => norm(f, (f.ai[0] + f.ai[1]) / 2));
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow: "visible" }}>
+      {[0.25, 0.5, 0.75, 1].map((s, i) => (
+        <polygon key={i}
+          points={Array.from({ length: N }, (_, k) => pointAt(k, radius * s).join(",")).join(" ")}
+          fill="none" stroke="#23232F" strokeWidth="1" />
+      ))}
+      {features.map((_, i) => {
+        const [x, y] = pointAt(i, radius);
+        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#23232F" strokeWidth="1" />;
+      })}
+      <polygon points={polygon(aiVals)} fill="rgba(244,124,124,0.06)"
+        stroke="#F47C7C" strokeWidth="1.4" strokeDasharray="4 4" />
+      <polygon points={polygon(humanVals)} fill="rgba(94,224,160,0.06)"
+        stroke="#5EE0A0" strokeWidth="1.4" strokeDasharray="4 4" />
+      <polygon points={polygon(userVals)} fill="rgba(78,205,196,0.18)"
+        stroke="#4ECDC4" strokeWidth="2" />
+      {userVals.map((v, i) => {
+        const [x, y] = pointAt(i, v * radius);
+        return <circle key={i} cx={x} cy={y} r="3.5" fill="#4ECDC4" stroke="#0B0B12" strokeWidth="1.5" />;
+      })}
+      {features.map((f, i) => {
+        const [x, y] = pointAt(i, radius + 22);
+        const angle = (Math.PI * 2 * i) / N - Math.PI / 2;
+        const anchor = Math.abs(Math.cos(angle)) < 0.3 ? "middle" : Math.cos(angle) > 0 ? "start" : "end";
+        const short = {
+          asl: "Avg Sentence Len",
+          ttr: "Lex Diversity",
+          hapax: "Hapax Ratio",
+          slv: "Sent Variance",
+          punc: "Punct Density",
+          func: "Func Words"
+        }[f.key] || f.name;
+        return (
+          <text key={i} x={x} y={y} textAnchor={anchor} dominantBaseline="middle"
+                className="radar-axis-label">{short}</text>
+        );
+      })}
+    </svg>
+  );
+}
+
+function ScoreRing({ value, size = 220 }) {
+  const stroke = 14;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const off = c * (1 - value / 100);
+  const color = value < 35 ? "#5EE0A0" : value < 65 ? "#F0C05A" : "#F47C7C";
+  const glow = value < 35 ? "rgba(94,224,160,.5)" : value < 65 ? "rgba(240,192,90,.5)" : "rgba(244,124,124,.5)";
+  return (
+    <div className="ring-wrap" style={{ width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)", filter: `drop-shadow(0 0 18px ${glow})` }}>
+        <circle cx={size/2} cy={size/2} r={r} stroke="#23232F" strokeWidth={stroke} fill="none"/>
+        <circle cx={size/2} cy={size/2} r={r} stroke={color} strokeWidth={stroke} fill="none"
+                strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round"
+                style={{ transition: "stroke-dashoffset .8s cubic-bezier(.6,.0,.2,1)" }}/>
+      </svg>
+      <div style={{ position: "absolute", textAlign: "center" }}>
+        <div className="display" style={{ fontSize: 56, fontWeight: 600, color, lineHeight: 1 }}>{value}<span style={{ fontSize: 24, color: "var(--text-2)", marginLeft: 2 }}>%</span></div>
+        <div className="muted" style={{ fontSize: 11, marginTop: 6, letterSpacing: ".08em", textTransform: "uppercase" }}>AI Probability</div>
+      </div>
+    </div>
+  );
+}
+
+function FeatureRow({ f }) {
+  const [lo, hi] = f.scale;
+  const pct = (v) => ((v - lo) / (hi - lo)) * 100;
+  const userPct = Math.max(0, Math.min(100, pct(f.value)));
+  const hPct1 = pct(f.human[0]), hPct2 = pct(f.human[1]);
+  const aPct1 = pct(f.ai[0]), aPct2 = pct(f.ai[1]);
+
+  const inHuman = f.value >= f.human[0] && f.value <= f.human[1];
+  const inAI = f.value >= f.ai[0] && f.value <= f.ai[1];
+  const status = inAI && !inHuman ? "ai" : inHuman && !inAI ? "human" : "ambig";
+  const statusLabel = status === "ai" ? "AI-like" : status === "human" ? "Human-like" : "Ambiguous";
+  const tagClass = status === "ai" ? "tag-ai" : status === "human" ? "tag-human" : "tag-ambig";
+
+  return (
+    <div className="feat">
+      <div>
+        <div className="feat-name">{f.name}</div>
+        <small style={{ color: "var(--text-3)", display: "block", marginTop: 3, fontSize: 12 }}>{f.desc}</small>
+      </div>
+      <div>
+        <div className="feat-val">{f.value.toFixed(f.decimals)}<small>{f.unit}</small></div>
+        <span className={`score-tag ${tagClass}`} style={{ marginTop: 6, fontSize: 10.5, padding: "3px 9px" }}>{statusLabel}</span>
+      </div>
+      <div>
+        <div className="range">
+          <div className="seg-a" style={{ left: aPct1 + "%", width: (aPct2 - aPct1) + "%" }}/>
+          <div className="seg-h" style={{ left: hPct1 + "%", width: (hPct2 - hPct1) + "%" }}/>
+          <div className="marker" style={{ left: `calc(${userPct}% - 1.5px)` }}/>
+        </div>
+        <div className="range-legend">
+          <span>{f.scale[0]}</span>
+          <span style={{ color: "var(--ai)" }}>AI {f.ai[0]}&ndash;{f.ai[1]}</span>
+          <span style={{ color: "var(--human)" }}>Human {f.human[0]}&ndash;{f.human[1]}</span>
+          <span>{f.scale[1]}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function generateInsights(result) {
+  const out = [];
+  const byKey = Object.fromEntries(result.features.map(f => [f.key, f]));
+  const ttr = byKey.ttr;
+  if (ttr.value < ttr.human[0]) {
+    out.push({ kind: "warn", text: "Your lexical diversity is below the typical human range. Repetitive word use is a common trigger for AI-detector false positives." });
+  } else {
+    out.push({ kind: "good", text: "Lexical diversity sits inside the typical human range — varied vocabulary works in your favor." });
+  }
+  const slv = byKey.slv;
+  if (slv.value < slv.human[0]) {
+    out.push({ kind: "warn", text: "Sentence lengths are very uniform. Human writing usually varies between short punchy sentences and longer, layered ones." });
+  } else {
+    out.push({ kind: "good", text: "Sentence-length variance is healthy — mixing short and long sentences signals natural rhythm." });
+  }
+  const asl = byKey.asl;
+  if (asl.value > asl.ai[0] && asl.value < asl.ai[1]) {
+    out.push({ kind: "info", text: `Average sentence length (${asl.value.toFixed(1)} words) overlaps with the AI typical band. This alone isn't conclusive — pair it with the other features.` });
+  }
+  return out.slice(0, 3);
+}
+
+Object.assign(window, { analyzeText, RadarChart, ScoreRing, FeatureRow, generateInsights });
+</script>
+
+<!-- pages -->
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo } = React;
+
+function Nav({ page, setPage }) {
+  const items = [
+    { id: "home", label: "Home" },
+    { id: "analyzer", label: "Analyzer" },
+    { id: "about", label: "About" }
+  ];
+  return (
+    <nav className="nav">
+      <div className="container nav-inner">
+        <div className="brand" onClick={() => setPage("home")} style={{ cursor: "pointer" }}>
+          <div className="brand-mark"></div>
+          WriteLens
+        </div>
+        <div className="nav-links">
+          {items.map(i => (
+            <div key={i.id}
+                 className={`nav-link ${page === i.id ? "active" : ""}`}
+                 onClick={() => setPage(i.id)}>{i.label}</div>
+          ))}
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="footer">
+      <div className="container footer-inner">
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="brand-mark" style={{ width: 18, height: 18 }}></div>
+          <span>WriteLens &mdash; ML Final Project &middot; BINUS University &middot; 2025</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <span className="link" style={{ display: "inline-flex", gap: 6, alignItems: "center" }}><IcoGit size={14}/> GitHub</span>
+          <span>v0.1 &middot; Educational tool, not a verdict</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+function SectionEyebrow({ eyebrow, title, sub }) {
+  return (
+    <div>
+      <div className="mono" style={{ fontSize: 11, color: "var(--accent)", letterSpacing: ".14em", textTransform: "uppercase", marginBottom: 14 }}>&mdash; {eyebrow}</div>
+      <h2 className="display" style={{ fontSize: 36, fontWeight: 600, margin: "0 0 12px", maxWidth: 640 }}>{title}</h2>
+      {sub && <p className="muted" style={{ fontSize: 16, maxWidth: 560, margin: 0, lineHeight: 1.6 }}>{sub}</p>}
+    </div>
+  );
+}
+
+function WhyCard({ ico, accent, title, body }) {
+  return (
+    <div className="card card-pad" style={{ display: "flex", gap: 18 }}>
+      <div style={{ flexShrink: 0, width: 38, height: 38, borderRadius: 10, background: `color-mix(in oklab, ${accent} 10%, transparent)`, border: `1px solid color-mix(in oklab, ${accent} 28%, transparent)`, color: accent, display: "flex", alignItems: "center", justifyContent: "center" }}>{ico}</div>
+      <div>
+        <h3 className="display" style={{ fontSize: 18, fontWeight: 600, margin: "0 0 8px" }}>{title}</h3>
+        <p className="muted" style={{ fontSize: 14, lineHeight: 1.65, margin: 0 }}>{body}</p>
+      </div>
+    </div>
+  );
+}
+
+function PreviewMockup() {
+  return (
+    <div className="card" style={{ padding: 22, textAlign: "left", boxShadow: "0 30px 80px -20px rgba(0,0,0,.5), 0 0 0 1px var(--border)", position: "relative" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18, paddingBottom: 14, borderBottom: "1px solid var(--border)" }}>
+        <div style={{ display: "flex", gap: 6 }}>
+          <span style={{ width: 10, height: 10, borderRadius: 99, background: "#3a3a4d" }}></span>
+          <span style={{ width: 10, height: 10, borderRadius: 99, background: "#3a3a4d" }}></span>
+          <span style={{ width: 10, height: 10, borderRadius: 99, background: "#3a3a4d" }}></span>
+        </div>
+        <span className="mono" style={{ fontSize: 11, color: "var(--text-3)" }}>writelens &middot; analysis</span>
+        <span className="pill" style={{ fontSize: 11 }}><span className="dot" style={{ background: "var(--ambig)", boxShadow: "0 0 8px var(--ambig)" }}></span>Ambiguous</span>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 28, alignItems: "center" }}>
+        <ScoreRing value={62} size={180}/>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {[
+            { name: "Lexical Diversity", v: 0.42, p: 28, status: "ai" },
+            { name: "Sentence Variance", v: 3.1, p: 22, status: "ai" },
+            { name: "Punctuation Density", v: 0.14, p: 58, status: "human" },
+            { name: "Avg Sentence Length", v: 19.4, p: 52, status: "ambig" }
+          ].map((r, i) => (
+            <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 70px 110px", gap: 14, alignItems: "center", fontSize: 13 }}>
+              <span>{r.name}</span>
+              <span className="mono" style={{ color: "var(--text-2)" }}>{r.v}</span>
+              <div className="range" style={{ height: 6 }}>
+                <div className="marker" style={{ left: `calc(${r.p}% - 1.5px)`, top: -6, height: 14, background: r.status === "ai" ? "var(--ai)" : r.status === "human" ? "var(--human)" : "var(--ambig)" }}/>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HomePage({ setPage }) {
+  return (
+    <div className="page-enter">
+      <section style={{ position: "relative", overflow: "hidden", paddingTop: 88, paddingBottom: 96 }}>
+        <div className="hero-glow" style={{ position: "absolute", top: -240, left: "50%", transform: "translateX(-50%)" }}></div>
+        <div className="container" style={{ position: "relative", textAlign: "center", maxWidth: 880 }}>
+          <div className="pill" style={{ marginBottom: 28 }}>
+            <span className="dot"></span>
+            Self-assessment for non-native writers
+          </div>
+          <h1 className="display" style={{ fontSize: "clamp(40px, 6vw, 68px)", fontWeight: 600, margin: "0 0 22px" }}>
+            See your writing through<br/>
+            a different <span style={{ color: "var(--accent)", position: "relative" }}>
+              lens
+              <svg width="120" height="14" style={{ position: "absolute", left: 0, bottom: -8, width: "100%" }} viewBox="0 0 120 14" preserveAspectRatio="none">
+                <path d="M2 9 C 30 3, 60 12, 118 5" stroke="var(--accent)" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.5"/>
+              </svg>
+            </span>
+          </h1>
+          <p className="muted" style={{ fontSize: 18, lineHeight: 1.6, maxWidth: 640, margin: "0 auto 36px" }}>
+            AI detectors frequently misflag non-native English writing. WriteLens shows you which
+            stylometric features in your essay trigger those false positives &mdash; so you can understand
+            your own writing, not be judged by it.
+          </p>
+          <div style={{ display: "inline-flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+            <button className="btn btn-primary" onClick={() => setPage("analyzer")}>
+              Try the Analyzer <IcoArrow size={16}/>
+            </button>
+            <button className="btn btn-ghost" onClick={() => setPage("about")}>
+              How it works
+            </button>
+          </div>
+          <div style={{ marginTop: 72, position: "relative" }}>
+            <PreviewMockup/>
+          </div>
+        </div>
+      </section>
+
+      <section className="container" style={{ paddingTop: 24, paddingBottom: 96 }}>
+        <SectionEyebrow eyebrow="How it works" title="Three steps to insight"
+                        sub="No accounts, no uploads kept. Your text stays in your browser session."/>
+        <div className="grid-3" style={{ marginTop: 48 }}>
+          {[
+            { i: <IcoClip size={20}/>, n: "01", t: "Paste or Upload", d: "Drop in your essay text, or upload a .txt / .docx file. We support drafts up to ~10,000 words." },
+            { i: <IcoLens size={20}/>, n: "02", t: "Analyze", d: "We compute stylometric features — lexical diversity, sentence variance, vocabulary richness, and more." },
+            { i: <IcoChart size={20}/>, n: "03", t: "Understand", d: "See exactly which features fall inside the AI-like band, and which sit comfortably in human territory." }
+          ].map((s, i) => (
+            <div key={i} className="card card-pad" style={{ position: "relative" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 22 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(78,205,196,.08)", border: "1px solid rgba(78,205,196,.22)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>{s.i}</div>
+                <span className="mono" style={{ color: "var(--text-3)", fontSize: 12 }}>{s.n}</span>
+              </div>
+              <h3 className="display" style={{ fontSize: 20, fontWeight: 600, margin: "0 0 8px" }}>{s.t}</h3>
+              <p className="muted" style={{ fontSize: 14, lineHeight: 1.65, margin: 0 }}>{s.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="container" style={{ paddingBottom: 96 }}>
+        <SectionEyebrow eyebrow="Why WriteLens" title="Detectors weren't trained on you"
+                        sub="The same patterns that make non-native writing distinct are the ones detectors learned to flag."/>
+        <div className="grid-2" style={{ marginTop: 48 }}>
+          <WhyCard ico={<IcoWarn size={18}/>} accent="var(--ai)"
+                   title="AI detectors flag non-native writing"
+                   body="Studies show detectors classify non-native English essays as AI-generated up to 60% more often than native ones. Lower lexical complexity and uniform sentence rhythm — both common second-language traits — sit inside the AI typical band."/>
+          <WhyCard ico={<IcoLens size={18}/>} accent="var(--accent)"
+                   title="Transparency over verdict"
+                   body="Other tools give you a number and walk away. WriteLens shows the math: for each feature, where your value sits relative to typical human and AI ranges — so you can decide what it means."/>
+          <WhyCard ico={<IcoSpark size={18}/>} accent="var(--amber)"
+                   title="Actionable, not punitive"
+                   body={'Instead of accusations, you get specific signals — “your sentence variance is low,” “your hapax ratio is healthy.” Use them to understand your style, not to defend yourself.'}/>
+          <WhyCard ico={<IcoChart size={18}/>} accent="var(--human)"
+                   title="Grounded in stylometry"
+                   body="The same features computational linguists have used for decades to study authorship — TTR, hapax legomena, sentence-length variance. No black-box LLM judging your writing."/>
+        </div>
+      </section>
+
+      <section className="container" style={{ paddingBottom: 96 }}>
+        <div className="card card-pad" style={{ padding: 48, textAlign: "center", background: "linear-gradient(160deg, rgba(78,205,196,0.06), transparent 60%), var(--surface)", border: "1px solid var(--border)" }}>
+          <h2 className="display" style={{ fontSize: 34, fontWeight: 600, margin: "0 0 12px" }}>Ready to look at your writing?</h2>
+          <p className="muted" style={{ fontSize: 16, maxWidth: 520, margin: "0 auto 24px" }}>
+            Paste an essay or a paragraph. The analyzer runs locally &mdash; nothing is stored.
+          </p>
+          <button className="btn btn-primary" onClick={() => setPage("analyzer")}>
+            Open the Analyzer <IcoArrow size={16}/>
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+const SAMPLE_TEXT = `The development of artificial intelligence has fundamentally changed how we approach problem solving in modern society. Many people believe AI will replace jobs. Others think it will create new opportunities. The reality is more complex.
+
+When students write essays, they often follow a structure they learned in school. This structure tends to be predictable. It uses certain patterns that AI models also learned. As a result, well-structured student writing can look similar to AI-generated text in some statistical measures.
+
+This is especially true for non-native English writers. Their vocabulary may be more limited. Their sentence structures may be more uniform. These traits do not mean the writing is artificial. They reflect the writer's level of language acquisition, not the source of the text.`;
+
+function LoadingResults() {
+  const steps = [
+    "Tokenizing text…",
+    "Computing lexical features…",
+    "Extracting sentence statistics…",
+    "Scoring against human/AI distributions…"
+  ];
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setI(x => Math.min(x + 1, steps.length - 1)), 350);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="card card-pad" style={{ padding: 48, textAlign: "center" }}>
+      <div style={{ width: 56, height: 56, borderRadius: 14, background: "rgba(78,205,196,.08)", border: "1px solid rgba(78,205,196,.25)", margin: "0 auto 22px", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent)", animation: "spin 2s linear infinite" }}>
+        <IcoLens size={24}/>
+      </div>
+      <h3 className="display" style={{ fontSize: 22, fontWeight: 600, margin: "0 0 10px" }}>Analyzing your writing</h3>
+      <p className="mono" style={{ fontSize: 13, color: "var(--text-2)", margin: 0 }}>{steps[i]}</p>
+      <div style={{ display: "flex", justifyContent: "center", gap: 4, marginTop: 22 }}>
+        {steps.map((_, k) => (
+          <div key={k} style={{ width: 28, height: 3, borderRadius: 2, background: k <= i ? "var(--accent)" : "var(--border-2)", transition: "background .2s" }}/>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Stat({ label, value }) {
+  return (
+    <div>
+      <div className="mono display" style={{ fontSize: 24, fontWeight: 600 }}>{value}</div>
+      <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>{label}</div>
+    </div>
+  );
+}
+
+function Results({ result }) {
+  const { aiProb, features, wordCount, sentenceCount } = result;
+  const zone = aiProb < 35 ? "human" : aiProb < 65 ? "ambig" : "ai";
+  const zoneText = zone === "human" ? "Likely human" : zone === "ambig" ? "Ambiguous zone" : "AI-like patterns";
+  const zoneDesc = zone === "human"
+    ? "Most features sit inside typical human ranges."
+    : zone === "ambig"
+    ? "Some features resemble AI patterns — common for non-native or formal writing."
+    : "Several features overlap with patterns AI models tend to produce.";
+  const tagClass = zone === "human" ? "tag-human" : zone === "ambig" ? "tag-ambig" : "tag-ai";
+
+  const insights = generateInsights(result);
+
+  return (
+    <div className="page-enter" style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      <div className="card" style={{ padding: 36, display: "grid", gridTemplateColumns: "260px 1fr", gap: 40, alignItems: "center" }}>
+        <ScoreRing value={aiProb}/>
+        <div>
+          <span className={`score-tag ${tagClass}`}>{zoneText}</span>
+          <h2 className="display" style={{ fontSize: 32, fontWeight: 600, margin: "16px 0 10px", lineHeight: 1.15 }}>
+            {zone === "human" && "Your writing reads as human."}
+            {zone === "ambig" && "Your writing sits in the ambiguous zone."}
+            {zone === "ai" && "Your writing overlaps AI patterns."}
+          </h2>
+          <p className="muted" style={{ fontSize: 15, lineHeight: 1.65, margin: "0 0 20px", maxWidth: 520 }}>{zoneDesc}</p>
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            <Stat label="Words" value={wordCount}/>
+            <Stat label="Sentences" value={sentenceCount}/>
+            <Stat label="Features analyzed" value={features.length}/>
+          </div>
+          <div className="insight" style={{ marginTop: 22, background: "rgba(255,255,255,.02)" }}>
+            <div className="insight-ico" style={{ background: "rgba(240,192,90,.08)", color: "var(--amber)" }}><IcoInfo size={16}/></div>
+            <div style={{ fontSize: 13, color: "var(--text-2)", lineHeight: 1.6 }}>
+              <strong style={{ color: "var(--text)", fontWeight: 500 }}>For self-assessment only.</strong> This score is not definitive proof of authorship and should not be used to accuse or grade students.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {insights.length > 0 && (
+        <div>
+          <h3 className="display" style={{ fontSize: 20, fontWeight: 600, margin: "0 0 14px" }}>Key insights</h3>
+          <div className="grid-3">
+            {insights.map((ins, i) => {
+              const cfg = ins.kind === "warn"
+                ? { ico: <IcoWarn size={16}/>, c: "var(--ai)", bg: "rgba(244,124,124,.08)" }
+                : ins.kind === "good"
+                ? { ico: <IcoCheck size={16}/>, c: "var(--human)", bg: "rgba(94,224,160,.08)" }
+                : { ico: <IcoInfo size={16}/>, c: "var(--accent)", bg: "rgba(78,205,196,.08)" };
+              return (
+                <div key={i} className="insight">
+                  <div className="insight-ico" style={{ background: cfg.bg, color: cfg.c }}>{cfg.ico}</div>
+                  <div style={{ fontSize: 13.5, color: "var(--text)", lineHeight: 1.6 }}>{ins.text}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="card card-pad" style={{ padding: 32 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8, flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <h3 className="display" style={{ fontSize: 22, fontWeight: 600, margin: "0 0 6px" }}>What our model sees in your writing</h3>
+            <p className="muted" style={{ fontSize: 14, margin: 0 }}>Each row shows your value against the typical human and AI bands.</p>
+          </div>
+          <div style={{ display: "flex", gap: 18, alignItems: "center", paddingTop: 6 }}>
+            <span className="legend-row"><span className="legend-sw" style={{ background: "var(--accent)" }}/>Your value</span>
+            <span className="legend-row"><span className="legend-sw" style={{ background: "var(--human)", opacity: .5 }}/>Human band</span>
+            <span className="legend-row"><span className="legend-sw" style={{ background: "var(--ai)", opacity: .5 }}/>AI band</span>
+          </div>
+        </div>
+        <div style={{ marginTop: 8 }}>
+          {features.map(f => <FeatureRow key={f.key} f={f}/>)}
+        </div>
+      </div>
+
+      <div className="card card-pad" style={{ padding: 32 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4, flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <h3 className="display" style={{ fontSize: 22, fontWeight: 600, margin: "0 0 6px" }}>Stylometric fingerprint</h3>
+            <p className="muted" style={{ fontSize: 14, margin: 0, maxWidth: 460 }}>Your text plotted against the average human and AI profiles across all measured features.</p>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 6 }}>
+            <span className="legend-row"><span className="legend-sw" style={{ background: "var(--accent)", height: 8, width: 18, borderRadius: 4 }}/>Your text</span>
+            <span className="legend-row"><span className="legend-sw" style={{ background: "var(--human)", opacity: .8, height: 2 }}/>Avg human (dashed)</span>
+            <span className="legend-row"><span className="legend-sw" style={{ background: "var(--ai)", opacity: .8, height: 2 }}/>Avg AI (dashed)</span>
+          </div>
+        </div>
+        <div style={{ display: "flex", justifyContent: "center", padding: "16px 0 8px" }}>
+          <RadarChart features={features} size={400}/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AnalyzerPage({ tweaks }) {
+  const [tab, setTab] = useState("paste");
+  const [text, setText] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [drag, setDrag] = useState(false);
+  const [state, setState] = useState("idle");
+  const [result, setResult] = useState(null);
+
+  const wordCount = useMemo(() => (text.match(/[A-Za-z']+/g) || []).length, [text]);
+  const canAnalyze = wordCount >= 20;
+
+  const onAnalyze = () => {
+    if (!canAnalyze) return;
+    setState("loading");
+    setResult(null);
+    setTimeout(() => {
+      setResult(analyzeText(text));
+      setState("done");
+    }, 1400);
+  };
+
+  const onSample = () => { setText(SAMPLE_TEXT); setTab("paste"); };
+
+  const onFile = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setText(String(e.target.result || ""));
+      setFileName(file.name);
+    };
+    reader.readAsText(file);
+  };
+
+  return (
+    <div className="page-enter">
+      <section className="container" style={{ paddingTop: 56, paddingBottom: 24 }}>
+        <div style={{ maxWidth: 760 }}>
+          <div className="mono" style={{ fontSize: 11, color: "var(--accent)", letterSpacing: ".14em", textTransform: "uppercase", marginBottom: 12 }}>&mdash; Analyzer</div>
+          <h1 className="display" style={{ fontSize: 44, fontWeight: 600, margin: "0 0 14px" }}>Analyze your writing</h1>
+          <p className="muted" style={{ fontSize: 16, lineHeight: 1.6, margin: 0 }}>
+            Paste an essay or upload a document. We&rsquo;ll surface the stylometric features that AI detectors pay attention to &mdash; and show you where your writing falls relative to typical human and AI ranges.
+          </p>
+        </div>
+      </section>
+
+      <section className="container" style={{ paddingBottom: 48 }}>
+        <div className="card card-pad" style={{ padding: 28 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexWrap: "wrap", gap: 12 }}>
+            <div className="tabs">
+              <div className={`tab ${tab === "paste" ? "active" : ""}`} onClick={() => setTab("paste")}>
+                <IcoText size={14}/> Paste Text
+              </div>
+              <div className={`tab ${tab === "upload" ? "active" : ""}`} onClick={() => setTab("upload")}>
+                <IcoUpload size={14}/> Upload File
+              </div>
+            </div>
+            <button className="link" onClick={onSample} style={{ background: "none", border: 0, fontSize: 13, fontFamily: "inherit", padding: 0 }}>
+              ✨ Try with sample text
+            </button>
+          </div>
+
+          {tab === "paste" ? (
+            <div>
+              <textarea className="ta" placeholder="Paste your essay or writing here..."
+                        value={text} onChange={e => setText(e.target.value)}/>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, fontSize: 12, color: "var(--text-3)" }}>
+                <span className="mono">
+                  <span style={{ color: wordCount >= 20 ? "var(--text-2)" : "var(--ambig)" }}>{wordCount}</span> words &middot; {text.length} chars
+                  {!canAnalyze && wordCount > 0 && <span style={{ marginLeft: 10, color: "var(--ambig)" }}>&middot; min 20 words</span>}
+                </span>
+                <span>We don&rsquo;t store any text. Analysis runs in your browser.</span>
+              </div>
+            </div>
+          ) : (
+            <div className={`dz ${drag ? "drag" : ""}`}
+                 onDragOver={e => { e.preventDefault(); setDrag(true); }}
+                 onDragLeave={() => setDrag(false)}
+                 onDrop={e => { e.preventDefault(); setDrag(false); onFile(e.dataTransfer.files[0]); }}
+                 onClick={() => document.getElementById("fileinput").click()}>
+              <input id="fileinput" type="file" accept=".txt,.docx,.md" hidden onChange={e => onFile(e.target.files[0])}/>
+              <div style={{ width: 48, height: 48, borderRadius: 12, background: "var(--surface)", margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent)" }}>
+                <IcoUpload size={22}/>
+              </div>
+              {fileName ? (
+                <div>
+                  <div style={{ color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>{fileName}</div>
+                  <div className="mono" style={{ fontSize: 12, color: "var(--text-3)" }}>{wordCount} words detected &middot; click to replace</div>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ color: "var(--text)", fontWeight: 500, marginBottom: 6, fontSize: 15 }}>Drop your file here, or click to browse</div>
+                  <div style={{ fontSize: 13, color: "var(--text-3)" }}>Supports .txt, .docx, .md &mdash; up to 10MB</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div style={{ marginTop: 22, display: "flex", justifyContent: "flex-end", gap: 12, alignItems: "center" }}>
+            {text && (
+              <button className="btn btn-ghost" onClick={() => { setText(""); setFileName(""); setResult(null); setState("idle"); }} style={{ padding: "11px 14px" }}>
+                Clear
+              </button>
+            )}
+            <button className="btn btn-primary" onClick={onAnalyze}
+                    disabled={!canAnalyze || state === "loading"}
+                    style={{ opacity: (!canAnalyze || state === "loading") ? 0.55 : 1, cursor: (!canAnalyze || state === "loading") ? "not-allowed" : "pointer" }}>
+              {state === "loading" ? (
+                <><span className="spinner"></span> Analyzing&hellip;</>
+              ) : (
+                <><IcoLens size={16}/> Analyze Writing</>
+              )}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {state === "loading" && (
+        <section className="container" style={{ paddingBottom: 96 }}>
+          <LoadingResults/>
+        </section>
+      )}
+
+      {state === "done" && result && (
+        <section className="container" style={{ paddingBottom: 96 }}>
+          <Results result={result} tweaks={tweaks}/>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function AboutPage() {
+  const [open, setOpen] = useState(0);
+
+  const features = [
+    { name: "Average Sentence Length", desc: "Mean number of words per sentence. AI-generated text tends to cluster around longer, uniform sentences (18–26 words)." },
+    { name: "Lexical Diversity (TTR)", desc: "Type-Token Ratio — the count of unique words divided by the total word count. Lower diversity is associated with both AI generation and second-language writing." },
+    { name: "Vocabulary Richness", desc: "Proportion of hapax legomena — words appearing exactly once. Reflects vocabulary breadth and is one of the most discriminative stylometric features." },
+    { name: "Sentence Length Variance", desc: "Standard deviation of sentence lengths. Human writers vary rhythm intentionally; AI tends toward uniform pacing." },
+    { name: "Punctuation Density", desc: "Punctuation marks per word. Distinct dialect and rhetorical habits show up here — em-dashes, semicolons, parentheticals." },
+    { name: "Function-Word Ratio", desc: "Share of high-frequency stopwords (the, of, and, …). A classical authorship-attribution signal." }
+  ];
+
+  return (
+    <div className="page-enter">
+      <section className="container" style={{ paddingTop: 56, paddingBottom: 32 }}>
+        <div style={{ maxWidth: 760 }}>
+          <div className="mono" style={{ fontSize: 11, color: "var(--accent)", letterSpacing: ".14em", textTransform: "uppercase", marginBottom: 12 }}>&mdash; About</div>
+          <h1 className="display" style={{ fontSize: 44, fontWeight: 600, margin: "0 0 18px" }}>Methodology &amp; transparency</h1>
+          <p className="muted" style={{ fontSize: 17, lineHeight: 1.65 }}>
+            WriteLens is a research-grade self-assessment tool built as a final project for the
+            Machine Learning course at BINUS University. Its goal is educational: to make the
+            features inside an AI-detection model visible to the writers they affect.
+          </p>
+        </div>
+      </section>
+
+      <section className="container" style={{ paddingBottom: 48 }}>
+        <div className="grid-2">
+          <div className="card card-pad" style={{ padding: 28 }}>
+            <span className="pill" style={{ marginBottom: 14 }}><span className="dot" style={{ background: "var(--amber)", boxShadow: "0 0 8px var(--amber)" }}/>Motivation</span>
+            <h3 className="display" style={{ fontSize: 22, fontWeight: 600, margin: "0 0 12px" }}>Why we built this</h3>
+            <p className="muted" style={{ fontSize: 14.5, lineHeight: 1.7, margin: 0 }}>
+              In 2023, Stanford researchers found AI detectors flagged 61% of TOEFL essays by non-native
+              English students as AI-generated. The pattern wasn&rsquo;t malice &mdash; it was statistics. Detectors
+              were trained on native English writing and learned that &ldquo;less varied vocabulary&rdquo; and
+              &ldquo;uniform sentences&rdquo; correlate with AI. Those traits also correlate with learning English
+              as a second language. WriteLens makes that overlap visible.
+            </p>
+          </div>
+          <div className="card card-pad" style={{ padding: 28 }}>
+            <span className="pill" style={{ marginBottom: 14 }}><span className="dot"/>What it is</span>
+            <h3 className="display" style={{ fontSize: 22, fontWeight: 600, margin: "0 0 12px" }}>A lens, not a verdict</h3>
+            <p className="muted" style={{ fontSize: 14.5, lineHeight: 1.7, margin: 0 }}>
+              WriteLens does not claim to detect AI writing accurately. It shows which features in your
+              text resemble AI patterns and which don&rsquo;t, against published distributions. The intent is
+              to give writers &mdash; especially non-native ones &mdash; a vocabulary for discussing their own style
+              and the limits of automated detection.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="container" style={{ paddingBottom: 48 }}>
+        <SectionEyebrow eyebrow="Methodology" title="How analysis works"/>
+        <div className="grid-3" style={{ marginTop: 36 }}>
+          {[
+            { n: "01", t: "Model", body: "Classical ML classifier (logistic regression with stylometric features). The full architecture and weights will be published with the project report." },
+            { n: "02", t: "Training Data", body: "Combined corpus drawn from DAIGT v2 (Kaggle), the GPT-written essay set, and a balanced sample of human-authored student essays. ~24,000 documents total, split 80/10/10." },
+            { n: "03", t: "Features", body: "Six stylometric features computed per document — see breakdown below. We deliberately avoid neural perplexity features so results stay interpretable." }
+          ].map((c, i) => (
+            <div key={i} className="card card-pad" style={{ padding: 26 }}>
+              <span className="mono" style={{ fontSize: 11, color: "var(--accent)", letterSpacing: ".1em" }}>{c.n}</span>
+              <h4 className="display" style={{ fontSize: 19, fontWeight: 600, margin: "8px 0 12px" }}>{c.t}</h4>
+              <p className="muted" style={{ fontSize: 14, lineHeight: 1.65, margin: 0 }}>{c.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="container" style={{ paddingBottom: 48 }}>
+        <h3 className="display" style={{ fontSize: 22, fontWeight: 600, margin: "0 0 18px" }}>The six features explained</h3>
+        <div className="card" style={{ padding: "0 28px" }}>
+          {features.map((f, i) => (
+            <div key={i} className="acc">
+              <div className="acc-h" onClick={() => setOpen(open === i ? -1 : i)}>
+                <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+                  <span className="mono" style={{ color: "var(--text-3)", fontSize: 12, width: 28 }}>0{i+1}</span>
+                  <span style={{ fontSize: 15, fontWeight: 500 }}>{f.name}</span>
+                </div>
+                <span className={`chev ${open === i ? "open" : ""}`}><IcoArrow size={16}/></span>
+              </div>
+              <div className={`acc-b ${open === i ? "open" : ""}`} style={{ paddingLeft: 42 }}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="container" style={{ paddingBottom: 48 }}>
+        <div className="card" style={{ padding: 32, borderColor: "rgba(244,124,124,.25)", background: "linear-gradient(160deg, rgba(244,124,124,0.04), transparent 70%), var(--surface)" }}>
+          <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
+            <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 10, background: "rgba(244,124,124,.1)", border: "1px solid rgba(244,124,124,.3)", color: "var(--ai)", display: "flex", alignItems: "center", justifyContent: "center" }}><IcoWarn size={20}/></div>
+            <div>
+              <h3 className="display" style={{ fontSize: 22, fontWeight: 600, margin: "0 0 14px" }}>Limitations &amp; disclaimer</h3>
+              <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 12, fontSize: 14.5, lineHeight: 1.65, color: "var(--text-2)" }}>
+                <li>&middot; <strong style={{ color: "var(--text)" }}>This is not ground truth.</strong> No automated tool can definitively determine whether a piece of text was written by a human or an AI.</li>
+                <li>&middot; <strong style={{ color: "var(--text)" }}>Do not use scores to accuse.</strong> Stylometric features overlap heavily between AI text and writing by non-native speakers, students, and people with autism or dyslexia.</li>
+                <li>&middot; <strong style={{ color: "var(--text)" }}>Short texts are unreliable.</strong> Statistical features need at least ~150 words to stabilize. Tweets, paragraphs, and one-liners will produce noise.</li>
+                <li>&middot; <strong style={{ color: "var(--text)" }}>The model has bias.</strong> Training data is predominantly English-language academic writing. Performance on other domains is untested.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="container" style={{ paddingBottom: 48 }}>
+        <SectionEyebrow eyebrow="Team" title="Who built this"/>
+        <div className="grid-3" style={{ marginTop: 32 }}>
+          {[
+            { n: "Team Member", r: "Model & ML pipeline", i: "TM" },
+            { n: "Team Member", r: "Frontend & UX", i: "TM" },
+            { n: "Team Member", r: "Research & data", i: "TM" }
+          ].map((p, i) => (
+            <div key={i} className="card card-pad" style={{ display: "flex", gap: 14, alignItems: "center" }}>
+              <div className="avatar">{p.i}</div>
+              <div>
+                <div style={{ fontWeight: 500, fontSize: 14 }}>{p.n}</div>
+                <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>{p.r}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="dim" style={{ fontSize: 12, marginTop: 16 }}>Replace placeholder names with your actual team members before presenting.</p>
+      </section>
+    </div>
+  );
+}
+
+Object.assign(window, { Nav, Footer, HomePage, AnalyzerPage, AboutPage });
+</script>
+
+<!-- app -->
+<script type="text/babel">
+const TWEAK_DEFAULTS = {
+  "accentColor": "#4ECDC4",
+  "headingFont": "Outfit",
+  "density": "regular",
+  "showInsightCards": true,
+  "startPage": "home"
+};
+
+const FONT_STACKS = {
+  "Outfit":        "'Outfit', system-ui, sans-serif",
+  "DM Sans":       "'DM Sans', system-ui, sans-serif",
+  "Space Grotesk": "'Space Grotesk', system-ui, sans-serif",
+  "Instrument":    "'Instrument Sans', system-ui, sans-serif"
+};
+
+function ensureFontLoaded(name) {
+  if (name === "Outfit") return;
+  const id = "gf-" + name.replace(/\s+/g, "-");
+  if (document.getElementById(id)) return;
+  const fam = name.replace(/\s+/g, "+");
+  const l = document.createElement("link");
+  l.id = id; l.rel = "stylesheet";
+  l.href = `https://fonts.googleapis.com/css2?family=${fam}:wght@400;500;600;700&display=swap`;
+  document.head.appendChild(l);
+}
+
+function hexToRgba(hex, a) {
+  const m = hex.replace("#", "");
+  const n = m.length === 3 ? m.split("").map(c => c + c).join("") : m;
+  const r = parseInt(n.slice(0, 2), 16);
+  const g = parseInt(n.slice(2, 4), 16);
+  const b = parseInt(n.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [page, setPage] = React.useState(tweaks.startPage || "home");
+
+  React.useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("--accent", tweaks.accentColor);
+    root.style.setProperty("--accent-glow", hexToRgba(tweaks.accentColor, 0.18));
+    ensureFontLoaded(tweaks.headingFont);
+    root.style.setProperty("--display", FONT_STACKS[tweaks.headingFont] || FONT_STACKS["Outfit"]);
+  }, [tweaks.accentColor, tweaks.headingFont, tweaks.density]);
+
+  React.useEffect(() => { window.scrollTo({ top: 0, behavior: "auto" }); }, [page]);
+
+  return (
+    <div>
+      <Nav page={page} setPage={setPage}/>
+      {page === "home" && <HomePage setPage={setPage} tweaks={tweaks}/>}
+      {page === "analyzer" && <AnalyzerPage tweaks={tweaks}/>}
+      {page === "about" && <AboutPage/>}
+      <Footer/>
+
+      <TweaksPanel title="WriteLens Tweaks">
+        <TweakSection label="Theme"/>
+        <TweakColor label="Accent" value={tweaks.accentColor}
+          options={["#4ECDC4", "#7C9CFF", "#F0C05A", "#C18BFF", "#5EE0A0"]}
+          onChange={(v) => setTweak("accentColor", v)}/>
+        <TweakSelect label="Heading font" value={tweaks.headingFont}
+          options={Object.keys(FONT_STACKS)}
+          onChange={(v) => setTweak("headingFont", v)}/>
+        <TweakRadio label="Density" value={tweaks.density}
+          options={["compact", "regular", "comfy"]}
+          onChange={(v) => setTweak("density", v)}/>
+        <TweakSection label="Navigation"/>
+        <TweakRadio label="Jump to" value={page}
+          options={["home", "analyzer", "about"]}
+          onChange={(v) => setPage(v)}/>
+      </TweaksPanel>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
