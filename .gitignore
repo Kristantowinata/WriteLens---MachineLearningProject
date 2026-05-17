@@ -21,13 +21,11 @@ dist-ssr/
 # IDE
 .vscode/
 .idea/
+.claude/
 
 # OS
 .DS_Store
 Thumbs.db
-
-# AI tools
-.claude/
 
 # Data
 data/
