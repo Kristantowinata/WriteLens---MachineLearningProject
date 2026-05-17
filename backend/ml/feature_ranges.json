@@ -1,9 +1,98 @@
 {
-  "_comment": "Placeholder feature ranges. Replace with actual statistics computed from training data once the ML model is trained. These mirror the FEATURE_DEFINITIONS in services/feature_extractor.py.",
-  "asl":   { "human_range": [14, 22],   "ai_range": [18, 26],   "scale": [5, 35] },
-  "ttr":   { "human_range": [0.55, 0.78], "ai_range": [0.38, 0.55], "scale": [0.2, 0.9] },
-  "hapax": { "human_range": [0.42, 0.62], "ai_range": [0.28, 0.44], "scale": [0.15, 0.75] },
-  "slv":   { "human_range": [5, 12],    "ai_range": [2, 6],     "scale": [0, 16] },
-  "punc":  { "human_range": [0.10, 0.18], "ai_range": [0.08, 0.14], "scale": [0, 0.25] },
-  "func":  { "human_range": [0.38, 0.50], "ai_range": [0.42, 0.55], "scale": [0.2, 0.65] }
+  "syllable_per_word": {
+    "human_low": 1.3073922282938675,
+    "human_high": 1.597393159166415,
+    "ai_low": 1.3561688602381592,
+    "ai_high": 1.7889119228861197,
+    "scale_min": 1.2105263157894737,
+    "scale_max": 1.9529336961022057
+  },
+  "function_word_ratio": {
+    "human_low": 0.39361702127659576,
+    "human_high": 0.49324324324324326,
+    "ai_low": 0.3496546398386889,
+    "ai_high": 0.4759603213242453,
+    "scale_min": 0.2857142857142857,
+    "scale_max": 0.5358303099054342
+  },
+  "transition_word_density": {
+    "human_low": 0.0,
+    "human_high": 0.0025,
+    "ai_low": 0.0,
+    "ai_high": 0.007159904534606206,
+    "scale_min": 0.0,
+    "scale_max": 0.01282051282051282
+  },
+  "comma_ratio": {
+    "human_low": 0.12280701754385964,
+    "human_high": 0.42857142857142855,
+    "ai_low": 0.16666666666666666,
+    "ai_high": 0.5116279069767442,
+    "scale_min": 0.0,
+    "scale_max": 0.6
+  },
+  "flesch_reading_ease": {
+    "human_low": 47.52480263605155,
+    "human_high": 78.32474896574558,
+    "ai_low": 33.075327586206924,
+    "ai_high": 76.303310909686,
+    "scale_min": 14.302945707284115,
+    "scale_max": 90.529
+  },
+  "pronoun_diversity": {
+    "human_low": 0.1,
+    "human_high": 0.3333333333333333,
+    "ai_low": 0.06666666666666667,
+    "ai_high": 0.3,
+    "scale_min": 0.0,
+    "scale_max": 0.4666666666666667
+  },
+  "hapax_ratio": {
+    "human_low": 0.20869565217391303,
+    "human_high": 0.5348837209302325,
+    "ai_low": 0.21666666666666667,
+    "ai_high": 0.6695242598385102,
+    "scale_min": 0.12565363598150484,
+    "scale_max": 0.8333333333333334
+  },
+  "punctuation_density": {
+    "human_low": 0.07838158823907043,
+    "human_high": 0.1805390604381103,
+    "ai_low": 0.10077519379844961,
+    "ai_high": 0.19642207792207778,
+    "scale_min": 0.05194805194805195,
+    "scale_max": 0.30303030303030304
+  },
+  "conjunction_rate": {
+    "human_low": 0.03453108455750696,
+    "human_high": 0.07043631652931287,
+    "ai_low": 0.034782608695652174,
+    "ai_high": 0.08163265306122448,
+    "scale_min": 0.012911568409343713,
+    "scale_max": 0.10204081632653061
+  },
+  "sentence_length_std": {
+    "human_low": 5.295113028925941,
+    "human_high": 13.614863175472099,
+    "ai_low": 4.153939843818415,
+    "ai_high": 10.074695518483317,
+    "scale_min": 1.247219128924647,
+    "scale_max": 24.29344608371779
+  },
+  "long_sentence_ratio": {
+    "human_low": 0.0,
+    "human_high": 0.5,
+    "ai_low": 0.0,
+    "ai_high": 0.4444444444444444,
+    "scale_min": 0.0,
+    "scale_max": 0.8571428571428571
+  },
+  "bigram_repetition_rate": {
+    "human_low": 0.030612244897959183,
+    "human_high": 0.12059369202226346,
+    "ai_low": 0.013071895424836602,
+    "ai_high": 0.155902004454343,
+    "scale_min": 0.0,
+    "scale_max": 0.20102315702222445
+  }
 }
