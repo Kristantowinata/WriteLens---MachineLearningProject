@@ -1,15 +1,17 @@
 import React from 'react';
 
 const SHORT_LABELS = {
-  asl: 'Avg Sentence Len',
-  ttr: 'Lex Diversity',
-  hapax: 'Hapax Ratio',
-  slv: 'Sent Variance',
-  punc: 'Punct Density',
-  func: 'Func Words',
+  syllable_per_word: 'Word Complexity',
+  sentence_length_std: 'Sentence Variance',
+  comma_ratio: 'Comma Usage',
+  punctuation_density: 'Punctuation',
+  hapax_ratio: 'Vocabulary Richness',
+  conjunction_rate: 'Conjunctions',
+  bigram_repetition_rate: 'Phrase Repetition',
+  flesch_reading_ease: 'Readability',
 };
 
-export default function RadarChart({ features, size = 360 }) {
+export default function RadarChart({ features, size = 400 }) {
   const cx = size / 2;
   const cy = size / 2;
   const radius = size * 0.36;
