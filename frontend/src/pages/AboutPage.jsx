@@ -4,28 +4,36 @@ import { SectionEyebrow } from '../components/shared.jsx';
 
 const FEATURES = [
   {
-    name: 'Average Sentence Length',
-    desc: 'Mean number of words per sentence. AI-generated text tends to cluster around longer, uniform sentences (18–26 words).',
-  },
-  {
-    name: 'Lexical Diversity (TTR)',
-    desc: "Type-Token Ratio — the count of unique words divided by the total word count. Lower diversity is associated with both AI generation and second-language writing.",
-  },
-  {
-    name: 'Vocabulary Richness',
-    desc: 'Proportion of hapax legomena — words appearing exactly once. Reflects vocabulary breadth and is one of the most discriminative stylometric features.',
+    name: 'Word Complexity',
+    desc: 'Average syllables per word. AI tends to use more complex vocabulary with higher syllable counts.',
   },
   {
     name: 'Sentence Length Variance',
-    desc: 'Standard deviation of sentence lengths. Human writers vary rhythm intentionally; AI tends toward uniform pacing.',
+    desc: 'How much sentence length varies. Human writing has more natural variation; AI tends toward uniform pacing.',
+  },
+  {
+    name: 'Comma Usage',
+    desc: 'Comma frequency relative to other punctuation. AI often produces more comma-heavy, structured text.',
   },
   {
     name: 'Punctuation Density',
-    desc: 'Punctuation marks per word. Distinct dialect and rhetorical habits show up here — em-dashes, semicolons, parentheticals.',
+    desc: 'Overall punctuation marks per word. Distinct dialect and rhetorical habits show up here.',
   },
   {
-    name: 'Function-Word Ratio',
-    desc: 'Share of high-frequency stopwords (the, of, and, …). A classical authorship-attribution signal.',
+    name: 'Vocabulary Richness',
+    desc: 'Proportion of words used only once (hapax legomena). Higher means more diverse vocabulary.',
+  },
+  {
+    name: 'Conjunction Frequency',
+    desc: 'How often connecting words (and, but, however) appear. Reflects writing flow and structure.',
+  },
+  {
+    name: 'Phrase Repetition',
+    desc: 'How often two-word phrases repeat in the text. AI-generated text sometimes shows more repetitive patterns.',
+  },
+  {
+    name: 'Readability Score',
+    desc: 'Flesch Reading Ease score. Higher means easier to read. AI text tends to score lower (more complex).',
   },
 ];
 
@@ -109,17 +117,22 @@ export default function AboutPage() {
             {
               n: '01',
               t: 'Model',
-              body: 'Classical ML classifier (logistic regression with stylometric features). The full architecture and weights will be published with the project report.',
+              body: 'Gradient Boosting classifier trained on stylometric features. The model analyzes 12 features extracted from your text and outputs an AI probability score. Achieved F1 score of 0.93 and AUC of 0.99 on held-out test data.',
             },
             {
               n: '02',
               t: 'Training Data',
-              body: 'Combined corpus drawn from DAIGT v2 (Kaggle), the GPT-written essay set, and a balanced sample of human-authored student essays. ~24,000 documents total, split 80/10/10.',
+              body: 'Trained on DAIGT v2, a dataset of ~44,800 essays containing both human-written student essays and AI-generated essays.',
             },
             {
               n: '03',
               t: 'Features',
-              body: 'Six stylometric features computed per document — see breakdown below. We deliberately avoid neural perplexity features so results stay interpretable.',
+              body: 'Twelve stylometric features computed per document \u2014 eight shown below. We deliberately avoid neural perplexity features so results stay interpretable.',
+            },
+            {
+              n: '04',
+              t: 'Accuracy',
+              body: 'This tool is designed for self-assessment, not definitive judgment. The model performs well on essay-style text similar to its training data, but accuracy may decrease on very short texts, informal writing, or non-English content.',
             },
           ].map((c, i) => (
             <div key={i} className="card card-pad" style={{ padding: 26 }}>
@@ -142,9 +155,12 @@ export default function AboutPage() {
 
       {/* Feature accordion */}
       <section className="container" style={{ paddingBottom: 48 }}>
-        <h3 className="display" style={{ fontSize: 22, fontWeight: 600, margin: '0 0 18px' }}>
-          The six features explained
+        <h3 className="display" style={{ fontSize: 22, fontWeight: 600, margin: '0 0 6px' }}>
+          The eight features explained
         </h3>
+        <p className="muted" style={{ fontSize: 13, margin: '0 0 18px' }}>
+          The model internally uses 12 features for prediction. The 8 shown below are the most interpretable ones.
+        </p>
         <div className="card" style={{ padding: '0 28px' }}>
           {FEATURES.map((f, i) => (
             <div key={i} className="acc">
