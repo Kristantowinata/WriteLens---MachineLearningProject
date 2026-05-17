@@ -1,5 +1,23 @@
 import React from 'react';
 
+/**
+ * Format a feature value for human-friendly display.
+ * Ratios → percentage, readability → integer, syllables → 2 dec.
+ */
+function formatValue(f) {
+  switch (f.key) {
+    case 'flesch_reading_ease':
+      return { display: Math.round(f.value), suffix: '/ 100' };
+    case 'sentence_length_std':
+      return { display: f.value.toFixed(1), suffix: f.unit };
+    case 'syllable_per_word':
+      return { display: f.value.toFixed(2), suffix: f.unit };
+    default:
+      // Ratios shown as percentage — much easier to grasp
+      return { display: (f.value * 100).toFixed(1), suffix: '%' };
+  }
+}
+
 export default function FeatureRow({ f }) {
   const [lo, hi] = f.scale;
   const pct = (v) => ((v - lo) / (hi - lo)) * 100;
@@ -16,6 +34,8 @@ export default function FeatureRow({ f }) {
     status === 'ai' ? 'AI-like' : status === 'human' ? 'Human-like' : 'Ambiguous';
   const tagClass = status === 'ai' ? 'tag-ai' : status === 'human' ? 'tag-human' : 'tag-ambig';
 
+  const { display, suffix } = formatValue(f);
+
   return (
     <div className="feat">
       <div>
@@ -26,8 +46,8 @@ export default function FeatureRow({ f }) {
       </div>
       <div>
         <div className="feat-val">
-          {f.value.toFixed(f.decimals)}
-          <small>{f.unit}</small>
+          {display}
+          <small>{suffix}</small>
         </div>
         <span
           className={`score-tag ${tagClass}`}
@@ -49,14 +69,8 @@ export default function FeatureRow({ f }) {
           <div className="marker" style={{ left: `calc(${userPct}% - 1.5px)` }} />
         </div>
         <div className="range-legend">
-          <span>{f.scale[0]}</span>
-          <span style={{ color: 'var(--ai)' }}>
-            AI {f.ai[0]}&ndash;{f.ai[1]}
-          </span>
-          <span style={{ color: 'var(--human)' }}>
-            Human {f.human[0]}&ndash;{f.human[1]}
-          </span>
-          <span>{f.scale[1]}</span>
+          <span style={{ color: 'var(--ai)' }}>AI range</span>
+          <span style={{ color: 'var(--human)' }}>Human range</span>
         </div>
       </div>
     </div>
