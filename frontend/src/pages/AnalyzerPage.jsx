@@ -203,27 +203,18 @@ function Results({ result }) {
             gap: 12,
           }}
         >
-          <div>
+        <div>
             <h3 className="display" style={{ fontSize: 22, fontWeight: 600, margin: '0 0 6px' }}>
               What our model sees in your writing
             </h3>
             <p className="muted" style={{ fontSize: 14, margin: 0 }}>
-              Each row shows your value against the typical human and AI bands.
+              Each feature shows where your writing falls on the human ↔ AI spectrum.
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 18, alignItems: 'center', paddingTop: 6 }}>
-            <span className="legend-row">
-              <span className="legend-sw" style={{ background: 'var(--accent)' }} />
-              Your value
-            </span>
-            <span className="legend-row">
-              <span className="legend-sw" style={{ background: 'var(--human)', opacity: 0.5 }} />
-              Human band
-            </span>
-            <span className="legend-row">
-              <span className="legend-sw" style={{ background: 'var(--ai)', opacity: 0.5 }} />
-              AI band
-            </span>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', paddingTop: 6 }}>
+            <span style={{ color: 'var(--human)', fontSize: 12 }}>🟢 Human</span>
+            <span style={{ color: 'var(--text-3)', fontSize: 12 }}>←→</span>
+            <span style={{ color: 'var(--ai)', fontSize: 12 }}>🔴 AI</span>
           </div>
         </div>
         <div style={{ marginTop: 8 }}>

@@ -191,34 +191,23 @@ button { font-family: inherit; }
 .feat-val { font-family: var(--mono); font-size: 15px; color: var(--text); }
 .feat-val small { color: var(--text-3); font-size: 11px; margin-left: 6px; }
 
-.range {
-  position: relative; height: 10px; border-radius: 6px;
+.spectrum {
+  position: relative; height: 6px; border-radius: 3px;
   background: linear-gradient(90deg,
-    rgba(244, 124, 124, .18) 0% 38%,
-    rgba(240, 192, 90, .18) 38% 62%,
-    rgba(94, 224, 160, .18) 62% 100%);
-  border: 1px solid var(--border);
+    rgba(94, 224, 160, .30),
+    rgba(240, 192, 90, .30) 50%,
+    rgba(244, 124, 124, .30));
 }
-.range .seg-h {
-  position: absolute; top: -1px; bottom: -1px;
-  border-radius: 6px;
-  background: rgba(94, 224, 160, .18);
-  border: 1px solid rgba(94, 224, 160, .4);
+.spectrum-dot {
+  position: absolute; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--bg);
+  transition: left .3s ease;
 }
-.range .seg-a {
-  position: absolute; top: -1px; bottom: -1px;
-  border-radius: 6px;
-  background: rgba(244, 124, 124, .16);
-  border: 1px solid rgba(244, 124, 124, .35);
-}
-.range .marker {
-  position: absolute; top: -5px;
-  width: 3px; height: 18px; border-radius: 2px;
-  background: var(--accent);
-  box-shadow: 0 0 10px var(--accent-glow);
-}
-.range-legend {
+.spectrum-labels {
   display: flex; justify-content: space-between;
+  align-items: center;
   font-size: 10.5px; color: var(--text-3);
   margin-top: 6px; font-family: var(--mono);
 }
