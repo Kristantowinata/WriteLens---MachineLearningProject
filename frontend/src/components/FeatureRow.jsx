@@ -13,13 +13,29 @@ function formatValue(f) {
   }
 }
 
-function computePosition(value, humanRange, aiRange) {
+/**
+ * Compute dot position (0–100) on the Human ← → AI spectrum.
+ * Uses status-driven zones so the dot ALWAYS matches the label:
+ *   human → 5–28%   (left/green zone)
+ *   ambig → 35–65%  (middle/yellow zone)
+ *   ai    → 72–95%  (right/red zone)
+ * Within each zone, fine-tunes based on distance to range centers.
+ */
+function computePosition(value, humanRange, aiRange, status) {
   const hMid = (humanRange[0] + humanRange[1]) / 2;
   const aMid = (aiRange[0] + aiRange[1]) / 2;
-  const diff = aMid - hMid;
-  if (Math.abs(diff) < 0.0001) return 50;
-  const raw = ((value - hMid) / diff) * 100;
-  return Math.max(5, Math.min(95, raw));
+
+  // How much does the value lean toward AI? (0 = pure human, 1 = pure AI)
+  const dH = Math.abs(value - hMid);
+  const dA = Math.abs(value - aMid);
+  const lean = (dH + dA) > 0 ? dH / (dH + dA) : 0.5;
+
+  // Map lean into the correct zone
+  switch (status) {
+    case 'human': return 5 + lean * 23;   // 5% – 28%
+    case 'ai':    return 72 + lean * 23;   // 72% – 95%
+    default:      return 35 + lean * 30;   // 35% – 65%
+  }
 }
 
 const VERDICTS = {
@@ -36,7 +52,7 @@ export default function FeatureRow({ f }) {
     status === 'ai' ? 'AI-like' : status === 'human' ? 'Human-like' : 'Ambiguous';
   const tagClass = status === 'ai' ? 'tag-ai' : status === 'human' ? 'tag-human' : 'tag-ambig';
 
-  const position = computePosition(f.value, f.human, f.ai);
+  const position = computePosition(f.value, f.human, f.ai, status);
   const { display, suffix } = formatValue(f);
   const dotColor =
     status === 'human' ? 'var(--human)' : status === 'ai' ? 'var(--ai)' : 'var(--ambig)';
