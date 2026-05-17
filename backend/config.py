@@ -5,7 +5,6 @@ BASE_DIR = Path(__file__).resolve().parent
 ML_DIR = BASE_DIR / "ml"
 FRONTEND_BUILD_DIR = BASE_DIR.parent / "frontend" / "dist"
 
-USE_ML_MODEL = os.environ.get("WRITELENS_USE_ML", "false").lower() == "true"
 MODEL_PATH = ML_DIR / "model.pkl"
 SCALER_PATH = ML_DIR / "scaler.pkl"
 FEATURE_RANGES_PATH = ML_DIR / "feature_ranges.json"

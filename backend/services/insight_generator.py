@@ -1,59 +1,65 @@
-from typing import List
-
 from models.schemas import FeatureResult, InsightResult
 
 
-def generate_insights(features: List[FeatureResult]) -> List[InsightResult]:
-    insights: List[InsightResult] = []
+def generate_insights(features):
+    insights = []
     by_key = {f.key: f for f in features}
 
-    ttr = by_key.get("ttr")
-    if ttr:
-        if ttr.value < ttr.human_range.low:
+    syl = by_key.get("syllable_per_word")
+    if syl:
+        if syl.status == "ai":
             insights.append(InsightResult(
                 kind="warn",
-                text=(
-                    "Your lexical diversity is below the typical human range. "
-                    "Repetitive word use is a common trigger for AI-detector false positives."
-                ),
+                text="Your writing uses more complex words (higher syllable count) "
+                     "than typical human writing. AI detectors often flag this."
             ))
-        else:
+        elif syl.status == "human":
             insights.append(InsightResult(
                 kind="good",
-                text=(
-                    "Lexical diversity sits inside the typical human range — "
-                    "varied vocabulary works in your favor."
-                ),
+                text="Word complexity is in the typical human range. "
+                     "Natural word choices work in your favor."
             ))
 
-    slv = by_key.get("slv")
+    slv = by_key.get("sentence_length_std")
     if slv:
-        if slv.value < slv.human_range.low:
+        if slv.status == "ai":
             insights.append(InsightResult(
                 kind="warn",
-                text=(
-                    "Sentence lengths are very uniform. Human writing usually varies "
-                    "between short punchy sentences and longer, layered ones."
-                ),
+                text="Your sentence lengths are very uniform. Human writing usually "
+                     "mixes short and long sentences more."
             ))
-        else:
+        elif slv.status == "human":
             insights.append(InsightResult(
                 kind="good",
-                text=(
-                    "Sentence-length variance is healthy — mixing short and long "
-                    "sentences signals natural rhythm."
-                ),
+                text="Good sentence length variety. Mixing short and long sentences "
+                     "signals natural writing rhythm."
             ))
 
-    asl = by_key.get("asl")
-    if asl and asl.ai_range.low <= asl.value <= asl.ai_range.high:
-        insights.append(InsightResult(
-            kind="info",
-            text=(
-                f"Average sentence length ({asl.value:.1f} words) overlaps with "
-                "the AI typical band. This alone isn't conclusive — pair it "
-                "with the other features."
-            ),
-        ))
+    hapax = by_key.get("hapax_ratio")
+    if hapax:
+        if hapax.status == "ai":
+            insights.append(InsightResult(
+                kind="info",
+                text="Vocabulary richness overlaps with AI patterns. "
+                     "Using more unique or uncommon words can help."
+            ))
+
+    flesch = by_key.get("flesch_reading_ease")
+    if flesch and len(insights) < 3:
+        if flesch.value < 40:
+            insights.append(InsightResult(
+                kind="info",
+                text="Readability score is low (text is hard to read). "
+                     "Very complex text sometimes gets flagged by AI detectors."
+            ))
+
+    comma = by_key.get("comma_ratio")
+    if comma and len(insights) < 3:
+        if comma.status == "ai":
+            insights.append(InsightResult(
+                kind="info",
+                text="Comma usage is higher than typical human writing. "
+                     "AI tends to produce more structured, comma-heavy sentences."
+            ))
 
     return insights[:3]
