@@ -21,6 +21,8 @@ dist-ssr/
 # IDE
 .vscode/
 .idea/
+.claude/
+.settings/
 
 # OS
 .DS_Store
