@@ -2,6 +2,28 @@
 
 WriteLens is a self-assessment tool that analyzes your writing style using stylometric features and a trained Gradient Boosting ML model. It helps non-native English writers understand which features in their writing might trigger AI detectors.
 
+## Dataset used for model training
+
+| Dataset | Source | Size | Description |
+|---|---|---|---|
+| DAIGT v2 | [Kaggle](https://www.kaggle.com/datasets/thedrcat/daigt-v2-train-dataset) | ~44,800 essays | Student essays, 0=human 1=AI. Used as primary training data |
+| MAGE | [HuggingFace](https://huggingface.co/datasets/yaful/MAGE) | ~447,000 texts | Multi-source (Reddit, Yelp, QA) human + LLM-generated texts. Used for augmentation (sampled 15k/class) |
+
+Final model trained on DAIGT v2 only — domain matches target users (essay/article writers) better than combined dataset.
+
+**Reference:**
+Li, Y., et al. (2024). *MAGE: Machine-generated Text Detection in the Wild.* arXiv:2305.13242
+
+| Dataset | Source | Size | Description |
+|---|---|---|---|
+| DAIGT v2 | [Kaggle](https://www.kaggle.com/datasets/thedrcat/daigt-v2-train-dataset) | ~44,800 essays | Student essays, 0=human 1=AI. Used as primary training data |
+| MAGE | [HuggingFace](https://huggingface.co/datasets/yaful/MAGE) | ~447,000 texts | Multi-source (Reddit, Yelp, QA) human + LLM-generated texts. Used for augmentation (sampled 15k/class) |
+
+Final model trained on DAIGT v2 only — domain matches target users (essay/article writers) better than combined dataset.
+
+**Reference:**
+Li, Y., et al. (2024). *MAGE: Machine-generated Text Detection in the Wild.* arXiv:2305.13242
+
 ## Quick Start (Local)
 
 ### Prerequisites
