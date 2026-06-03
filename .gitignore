@@ -9,9 +9,10 @@ dist/
 dist-ssr/
 .vite/
 
-# ML artifacts
+# ML artifacts (ignore generally, but allow backend/ml/ for deployment)
 *.pkl
 *.joblib
+!backend/ml/*.pkl
 
 # Environment
 .env
