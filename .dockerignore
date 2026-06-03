@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+
+# Build artifacts (rebuilt inside Docker)
+frontend/dist/
+frontend/node_modules/
+
+# Git & IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+.claude/
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data & notebooks (not needed for production)
+data/
+notebooks/
+
+# Docs
+README.md
+WriteLens_Technical_Spec.md
+
+# Render config (not needed for Docker)
+render.yaml
+render-build.sh
