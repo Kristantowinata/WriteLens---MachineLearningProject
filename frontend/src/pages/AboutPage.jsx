@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { IcoArrow, IcoWarn } from '../components/icons.jsx';
 import { SectionEyebrow } from '../components/shared.jsx';
 
+import photoKenneth from '../../photo/KennethOwenGozali.png';
+import photoKristanto from '../../photo/KristantoWinata.png';
+import photoWesley from '../../photo/WesleyPeyfendo.png';
+
 const FEATURES = [
   {
     name: 'Word Complexity',
@@ -269,16 +273,21 @@ export default function AboutPage() {
         <SectionEyebrow eyebrow="Team" title="Who built this" />
         <div className="grid-3" style={{ marginTop: 32 }}>
           {[
-            { n: 'Team Member', r: 'Model & ML pipeline', i: 'TM' },
-            { n: 'Team Member', r: 'Frontend & UX', i: 'TM' },
-            { n: 'Team Member', r: 'Research & data', i: 'TM' },
+            { n: 'Kenneth Owen Gozali', r: 'Model & ML pipeline', img: photoKenneth },
+            { n: 'Kristanto Winata', r: 'Frontend & UX', img: photoKristanto },
+            { n: 'Wesley Peyfendo', r: 'Research & data', img: photoWesley },
           ].map((p, i) => (
             <div
               key={i}
               className="card card-pad"
               style={{ display: 'flex', gap: 14, alignItems: 'center' }}
             >
-              <div className="avatar">{p.i}</div>
+              <img
+                className="avatar"
+                src={p.img}
+                alt={p.n}
+                style={{ objectFit: 'cover', padding: 0 }}
+              />
               <div>
                 <div style={{ fontWeight: 500, fontSize: 14 }}>{p.n}</div>
                 <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
@@ -288,9 +297,6 @@ export default function AboutPage() {
             </div>
           ))}
         </div>
-        <p className="dim" style={{ fontSize: 12, marginTop: 16 }}>
-          Replace placeholder names with your actual team members before presenting.
-        </p>
       </section>
     </div>
   );
