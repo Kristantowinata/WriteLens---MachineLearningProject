@@ -87,7 +87,7 @@ function Results({ result }) {
     (zone === 'human'
       ? 'Most features sit inside typical human ranges.'
       : zone === 'ambiguous'
-      ? 'Some features resemble AI patterns — common for non-native or formal writing.'
+      ? 'Some features resemble AI patterns - common for non-native or formal writing.'
       : 'Several features overlap with patterns AI models tend to produce.');
   const tagClass =
     zone === 'human' ? 'tag-human' : zone === 'ai' ? 'tag-ai' : 'tag-ambig';
