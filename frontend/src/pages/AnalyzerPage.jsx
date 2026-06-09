@@ -19,10 +19,10 @@ This is especially true for non-native English writers. Their vocabulary may be 
 
 function LoadingResults() {
   const steps = [
-    'Tokenizing text…',
-    'Computing lexical features…',
-    'Extracting sentence statistics…',
-    'Scoring against human/AI distributions…',
+    'Tokenizing text...',
+    'Computing lexical features...',
+    'Extracting sentence statistics...',
+    'Scoring against human/AI distributions...',
   ];
   const [i, setI] = useState(0);
   useEffect(() => {
@@ -355,14 +355,14 @@ export default function AnalyzerPage() {
               marginBottom: 12,
             }}
           >
-            &mdash; Analyzer
+            - Analyzer
           </div>
           <h1 className="display" style={{ fontSize: 44, fontWeight: 600, margin: '0 0 14px' }}>
             Analyze your writing
           </h1>
           <p className="muted" style={{ fontSize: 16, lineHeight: 1.6, margin: 0 }}>
-            Paste an essay or upload a document. We&rsquo;ll surface the stylometric features that
-            AI detectors pay attention to &mdash; and show you where your writing falls relative to
+            Paste an essay or upload a document. We'll surface the stylometric features that
+            AI detectors pay attention to - and show you where your writing falls relative to
             typical human and AI ranges.
           </p>
         </div>
@@ -425,14 +425,14 @@ export default function AnalyzerPage() {
                   <span style={{ color: wordCount >= 20 ? 'var(--text-2)' : 'var(--ambig)' }}>
                     {wordCount}
                   </span>{' '}
-                  words &middot; {text.length} chars
+                  words - {text.length} chars
                   {!canAnalyze && wordCount > 0 && (
                     <span style={{ marginLeft: 10, color: 'var(--ambig)' }}>
-                      &middot; min 20 words
+                      - min 20 words
                     </span>
                   )}
                 </span>
-                <span>We don&rsquo;t store any text. Analysis runs in your browser.</span>
+                <span>We don't store any text. Analysis runs in your browser.</span>
               </div>
             </div>
           ) : (
@@ -478,7 +478,7 @@ export default function AnalyzerPage() {
                     {fileName}
                   </div>
                   <div className="mono" style={{ fontSize: 12, color: 'var(--text-3)' }}>
-                    {wordCount} words detected &middot; click to replace
+                    {wordCount} words detected - click to replace
                   </div>
                 </div>
               ) : (
@@ -489,7 +489,7 @@ export default function AnalyzerPage() {
                     Drop your file here, or click to browse
                   </div>
                   <div style={{ fontSize: 13, color: 'var(--text-3)' }}>
-                    Supports .txt, .docx, .md &mdash; up to 10MB
+                    Supports .txt, .docx, .md - up to 10MB
                   </div>
                 </div>
               )}
@@ -538,7 +538,7 @@ export default function AnalyzerPage() {
             >
               {state === 'loading' ? (
                 <>
-                  <span className="spinner" /> Analyzing&hellip;
+                  <span className="spinner" /> Analyzing...
                 </>
               ) : (
                 <>

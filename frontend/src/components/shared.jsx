@@ -13,7 +13,7 @@ export function SectionEyebrow({ eyebrow, title, sub }) {
           marginBottom: 14,
         }}
       >
-        &mdash; {eyebrow}
+        - {eyebrow}
       </div>
       <h2
         className="display"

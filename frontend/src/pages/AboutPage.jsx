@@ -6,38 +6,71 @@ import photoKenneth from '../../photo/KennethOwenGozali.png';
 import photoKristanto from '../../photo/KristantoWinata.png';
 import photoWesley from '../../photo/WesleyPeyfendo.png';
 
+// All 12 features used by the model, ordered by statistical importance (Cohen's d)
 const FEATURES = [
   {
     name: 'Word Complexity',
     desc: 'Average syllables per word. AI tends to use more complex vocabulary with higher syllable counts.',
+    strength: 0.701,
   },
   {
-    name: 'Sentence Length Variance',
-    desc: 'How much sentence length varies. Human writing has more natural variation; AI tends toward uniform pacing.',
+    name: 'Function Word Ratio',
+    desc: 'Proportion of function words (the, is, at, for, etc.) in the text. Human writing tends to use more function words; AI often favors content-heavy phrasing with fewer filler words.',
+    strength: 0.510,
+    internal: true,
+  },
+  {
+    name: 'Transition Word Density',
+    desc: 'How often transition words (however, therefore, moreover, etc.) appear per word. AI-generated text frequently uses these to create an appearance of logical flow.',
+    strength: 0.500,
+    internal: true,
   },
   {
     name: 'Comma Usage',
     desc: 'Comma frequency relative to other punctuation. AI often produces more comma-heavy, structured text.',
-  },
-  {
-    name: 'Punctuation Density',
-    desc: 'Overall punctuation marks per word. Distinct dialect and rhetorical habits show up here.',
-  },
-  {
-    name: 'Vocabulary Richness',
-    desc: 'Proportion of words used only once (hapax legomena). Higher means more diverse vocabulary.',
-  },
-  {
-    name: 'Conjunction Frequency',
-    desc: 'How often connecting words (and, but, however) appear. Reflects writing flow and structure.',
-  },
-  {
-    name: 'Phrase Repetition',
-    desc: 'How often two-word phrases repeat in the text. AI-generated text sometimes shows more repetitive patterns.',
+    strength: 0.480,
   },
   {
     name: 'Readability Score',
     desc: 'Flesch Reading Ease score. Higher means easier to read. AI text tends to score lower (more complex).',
+    strength: 0.450,
+  },
+  {
+    name: 'Pronoun Diversity',
+    desc: 'How many different pronouns (I, you, he, she, they, etc.) are used relative to the full pronoun set. Human writing tends to use a narrower, more personal set of pronouns.',
+    strength: 0.350,
+    internal: true,
+  },
+  {
+    name: 'Vocabulary Richness',
+    desc: 'Proportion of words used only once (hapax legomena). Higher means more diverse vocabulary.',
+    strength: 0.309,
+  },
+  {
+    name: 'Punctuation Density',
+    desc: 'Overall punctuation marks per word. Distinct dialect and rhetorical habits show up here.',
+    strength: 0.300,
+  },
+  {
+    name: 'Conjunction Frequency',
+    desc: 'How often connecting words (and, but, however) appear. Reflects writing flow and structure.',
+    strength: 0.280,
+  },
+  {
+    name: 'Sentence Length Variance',
+    desc: 'How much sentence length varies. Human writing has more natural variation; AI tends toward uniform pacing.',
+    strength: 0.250,
+  },
+  {
+    name: 'Long Sentence Ratio',
+    desc: 'Proportion of sentences with more than 25 words. Combined with sentence length variance, this helps detect AI\'s tendency toward consistently structured sentence lengths.',
+    strength: 0.200,
+    internal: true,
+  },
+  {
+    name: 'Phrase Repetition',
+    desc: 'How often two-word phrases repeat in the text. AI-generated text sometimes shows more repetitive patterns.',
+    strength: 0.180,
   },
 ];
 
@@ -59,7 +92,7 @@ export default function AboutPage() {
               marginBottom: 12,
             }}
           >
-            &mdash; About
+            - About
           </div>
           <h1 className="display" style={{ fontSize: 44, fontWeight: 600, margin: '0 0 18px' }}>
             Methodology &amp; transparency
@@ -88,9 +121,9 @@ export default function AboutPage() {
             </h3>
             <p className="muted" style={{ fontSize: 14.5, lineHeight: 1.7, margin: 0 }}>
               In 2023, Stanford researchers found AI detectors flagged 61% of TOEFL essays by
-              non-native English students as AI-generated. The pattern wasn&rsquo;t malice &mdash; it
+              non-native English students as AI-generated. The pattern wasn't malice - it
               was statistics. Detectors were trained on native English writing and learned that
-              &ldquo;less varied vocabulary&rdquo; and &ldquo;uniform sentences&rdquo; correlate with
+              "less varied vocabulary" and "uniform sentences" correlate with
               AI. Those traits also correlate with learning English as a second language. WriteLens
               makes that overlap visible.
             </p>
@@ -105,8 +138,8 @@ export default function AboutPage() {
             </h3>
             <p className="muted" style={{ fontSize: 14.5, lineHeight: 1.7, margin: 0 }}>
               WriteLens does not claim to detect AI writing accurately. It shows which features in
-              your text resemble AI patterns and which don&rsquo;t, against published distributions.
-              The intent is to give writers &mdash; especially non-native ones &mdash; a vocabulary
+              your text resemble AI patterns and which don't, against published distributions.
+              The intent is to give writers - especially non-native ones - a vocabulary
               for discussing their own style and the limits of automated detection.
             </p>
           </div>
@@ -131,7 +164,7 @@ export default function AboutPage() {
             {
               n: '03',
               t: 'Features',
-              body: 'Twelve stylometric features computed per document \u2014 eight shown below. We deliberately avoid neural perplexity features so results stay interpretable.',
+              body: 'Twelve stylometric features computed per document - all explained below. Eight are visualized in the analysis results; the remaining four are used internally by the model. We deliberately avoid neural perplexity features so results stay interpretable.',
             },
             {
               n: '04',
@@ -160,20 +193,68 @@ export default function AboutPage() {
       {/* Feature accordion */}
       <section className="container" style={{ paddingBottom: 48 }}>
         <h3 className="display" style={{ fontSize: 22, fontWeight: 600, margin: '0 0 6px' }}>
-          The eight features explained
+          All twelve features explained
         </h3>
-        <p className="muted" style={{ fontSize: 13, margin: '0 0 18px' }}>
-          The model internally uses 12 features for prediction. The 8 shown below are the most interpretable ones.
+        <p className="muted" style={{ fontSize: 13, margin: '0 0 10px' }}>
+          The model uses 12 stylometric features for prediction, ordered below by statistical importance (Cohen's d).
         </p>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            fontSize: 12, color: 'var(--text-2)',
+          }}>
+            <span style={{
+              width: 8, height: 8, borderRadius: '50%',
+              background: 'var(--accent)', boxShadow: '0 0 6px var(--accent)',
+            }} />
+            Shown in analysis
+          </span>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            fontSize: 12, color: 'var(--text-3)',
+          }}>
+            <span style={{
+              width: 8, height: 8, borderRadius: '50%',
+              background: 'var(--text-3)', opacity: 0.5,
+            }} />
+            Model only
+          </span>
+        </div>
         <div className="card" style={{ padding: '0 28px' }}>
           {FEATURES.map((f, i) => (
             <div key={i} className="acc">
               <div className="acc-h" onClick={() => setOpen(open === i ? -1 : i)}>
-                <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                  <span className="mono" style={{ color: 'var(--text-3)', fontSize: 12, width: 28 }}>
-                    0{i + 1}
+                <div style={{ display: 'flex', gap: 14, alignItems: 'center', flex: 1, minWidth: 0 }}>
+                  <span className="mono" style={{ color: 'var(--text-3)', fontSize: 12, width: 24, flexShrink: 0 }}>
+                    {String(i + 1).padStart(2, '0')}
                   </span>
-                  <span style={{ fontSize: 15, fontWeight: 500 }}>{f.name}</span>
+                  <span style={{
+                    fontSize: 15, fontWeight: 500,
+                    opacity: f.internal ? 0.65 : 1,
+                  }}>
+                    {f.name}
+                  </span>
+                  {f.internal ? (
+                    <span style={{
+                      fontSize: 10, fontWeight: 500, letterSpacing: '.04em',
+                      padding: '2px 8px', borderRadius: 99,
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      color: 'var(--text-3)', whiteSpace: 'nowrap', flexShrink: 0,
+                    }}>
+                      MODEL ONLY
+                    </span>
+                  ) : (
+                    <span style={{
+                      fontSize: 10, fontWeight: 500, letterSpacing: '.04em',
+                      padding: '2px 8px', borderRadius: 99,
+                      background: 'rgba(99,220,190,0.1)',
+                      border: '1px solid rgba(99,220,190,0.2)',
+                      color: 'var(--accent)', whiteSpace: 'nowrap', flexShrink: 0,
+                    }}>
+                      SHOWN IN ANALYSIS
+                    </span>
+                  )}
                 </div>
                 <span className={`chev ${open === i ? 'open' : ''}`}>
                   <IcoArrow size={16} />
@@ -183,7 +264,12 @@ export default function AboutPage() {
                 className={`acc-b ${open === i ? 'open' : ''}`}
                 style={{ paddingLeft: 42 }}
               >
-                {f.desc}
+                <div>{f.desc}</div>
+                <div className="mono" style={{
+                  fontSize: 11, color: 'var(--text-3)', marginTop: 8,
+                }}>
+                  Effect size (Cohen's d): {f.strength.toFixed(2)}
+                </div>
               </div>
             </div>
           ))}
@@ -239,25 +325,25 @@ export default function AboutPage() {
                 }}
               >
                 <li>
-                  &middot;{' '}
+                  -{' '}
                   <strong style={{ color: 'var(--text)' }}>This is not ground truth.</strong> No
                   automated tool can definitively determine whether a piece of text was written by a
                   human or an AI.
                 </li>
                 <li>
-                  &middot;{' '}
+                  -{' '}
                   <strong style={{ color: 'var(--text)' }}>Do not use scores to accuse.</strong>{' '}
                   Stylometric features overlap heavily between AI text and writing by non-native
                   speakers, students, and people with autism or dyslexia.
                 </li>
                 <li>
-                  &middot;{' '}
+                  -{' '}
                   <strong style={{ color: 'var(--text)' }}>Short texts are unreliable.</strong>{' '}
                   Statistical features need at least ~150 words to stabilize. Tweets, paragraphs,
                   and one-liners will produce noise.
                 </li>
                 <li>
-                  &middot;{' '}
+                  -{' '}
                   <strong style={{ color: 'var(--text)' }}>The model has bias.</strong> Training
                   data is predominantly English-language academic writing. Performance on other
                   domains is untested.

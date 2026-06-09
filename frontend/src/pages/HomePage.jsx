@@ -42,6 +42,13 @@ function WhyCard({ ico, accent, title, body }) {
 }
 
 function PreviewMockup() {
+  const mockFeatures = [
+    { name: 'Word Complexity', v: '1.58', suffix: 'syl', position: 62, status: 'ambig' },
+    { name: 'Comma Usage', v: '38.2', suffix: '%', position: 78, status: 'ai' },
+    { name: 'Punctuation Density', v: '12.4', suffix: '%', position: 22, status: 'human' },
+    { name: 'Sentence Length Variance', v: '5.8', suffix: 'σ', position: 74, status: 'ai' },
+  ];
+
   return (
     <div
       className="card"
@@ -68,7 +75,7 @@ function PreviewMockup() {
           <span style={{ width: 10, height: 10, borderRadius: 99, background: '#3a3a4d' }} />
         </div>
         <span className="mono" style={{ fontSize: 11, color: 'var(--text-3)' }}>
-          writelens &middot; analysis
+          writelens - analysis
         </span>
         <span className="pill" style={{ fontSize: 11 }}>
           <span
@@ -87,45 +94,44 @@ function PreviewMockup() {
         }}
       >
         <ScoreRing value={62} size={180} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {[
-            { name: 'Lexical Diversity', v: 0.42, p: 28, status: 'ai' },
-            { name: 'Sentence Variance', v: 3.1, p: 22, status: 'ai' },
-            { name: 'Punctuation Density', v: 0.14, p: 58, status: 'human' },
-            { name: 'Avg Sentence Length', v: 19.4, p: 52, status: 'ambig' },
-          ].map((r, i) => (
-            <div
-              key={i}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 70px 110px',
-                gap: 14,
-                alignItems: 'center',
-                fontSize: 13,
-              }}
-            >
-              <span>{r.name}</span>
-              <span className="mono" style={{ color: 'var(--text-2)' }}>
-                {r.v}
-              </span>
-              <div className="range" style={{ height: 6 }}>
-                <div
-                  className="marker"
-                  style={{
-                    left: `calc(${r.p}% - 1.5px)`,
-                    top: -6,
-                    height: 14,
-                    background:
-                      r.status === 'ai'
-                        ? 'var(--ai)'
-                        : r.status === 'human'
-                        ? 'var(--human)'
-                        : 'var(--ambig)',
-                  }}
-                />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {mockFeatures.map((r, i) => {
+            const dotColor =
+              r.status === 'human' ? 'var(--human)' : r.status === 'ai' ? 'var(--ai)' : 'var(--ambig)';
+            const statusLabel =
+              r.status === 'human' ? 'Human-like' : r.status === 'ai' ? 'AI-like' : 'Ambiguous';
+            const tagClass =
+              r.status === 'ai' ? 'tag-ai' : r.status === 'human' ? 'tag-human' : 'tag-ambig';
+            return (
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 13, fontWeight: 500 }}>{r.name}</span>
+                    <span
+                      className={`score-tag ${tagClass}`}
+                      style={{ fontSize: 9, padding: '1px 6px', lineHeight: '13px' }}
+                    >
+                      {statusLabel}
+                    </span>
+                  </div>
+                  <span className="mono" style={{ color: 'var(--text-2)', fontSize: 12 }}>
+                    {r.v}<small style={{ color: 'var(--text-3)', marginLeft: 2 }}>{r.suffix}</small>
+                  </span>
+                </div>
+                <div className="spectrum" style={{ height: 5 }}>
+                  <div
+                    className="spectrum-dot"
+                    style={{
+                      left: `${r.position}%`,
+                      background: dotColor,
+                      boxShadow: `0 0 6px ${dotColor}`,
+                      width: 10, height: 10,
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
@@ -181,7 +187,7 @@ export default function HomePage({ setPage }) {
             style={{ fontSize: 18, lineHeight: 1.6, maxWidth: 640, margin: '0 auto 36px' }}
           >
             AI detectors frequently misflag non-native English writing. WriteLens shows you which
-            stylometric features in your essay trigger those false positives &mdash; so you can
+            stylometric features in your essay trigger those false positives - so you can
             understand your own writing, not be judged by it.
           </p>
           <div style={{ display: 'inline-flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -217,7 +223,7 @@ export default function HomePage({ setPage }) {
               i: <IcoLens size={20} />,
               n: '02',
               t: 'Analyze',
-              d: 'We compute stylometric features — lexical diversity, sentence variance, vocabulary richness, and more.',
+              d: 'We compute stylometric features - word complexity, sentence length variance, vocabulary richness, and more.',
             },
             {
               i: <IcoChart size={20} />,
@@ -277,25 +283,25 @@ export default function HomePage({ setPage }) {
             ico={<IcoWarn size={18} />}
             accent="var(--ai)"
             title="AI detectors flag non-native writing"
-            body="Studies show detectors classify non-native English essays as AI-generated up to 60% more often than native ones. Lower lexical complexity and uniform sentence rhythm — both common second-language traits — sit inside the AI typical band."
+            body="Studies show detectors classify non-native English essays as AI-generated up to 60% more often than native ones. Lower word complexity and uniform sentence rhythm - both common second-language traits - sit inside the AI typical band."
           />
           <WhyCard
             ico={<IcoLens size={18} />}
             accent="var(--accent)"
             title="Transparency over verdict"
-            body="Other tools give you a number and walk away. WriteLens shows the math: for each feature, where your value sits relative to typical human and AI ranges — so you can decide what it means."
+            body="Other tools give you a number and walk away. WriteLens shows the math: for each feature, where your value sits relative to typical human and AI ranges - so you can decide what it means."
           />
           <WhyCard
             ico={<IcoSpark size={18} />}
             accent="var(--amber)"
             title="Actionable, not punitive"
-            body={'Instead of accusations, you get specific signals — "your sentence variance is low," "your hapax ratio is healthy." Use them to understand your style, not to defend yourself.'}
+            body={'Instead of accusations, you get specific signals - "your sentence length variance is low," "your vocabulary richness is healthy." Use them to understand your style, not to defend yourself.'}
           />
           <WhyCard
             ico={<IcoChart size={18} />}
             accent="var(--human)"
             title="Grounded in stylometry"
-            body="The same features computational linguists have used for decades to study authorship — TTR, hapax legomena, sentence-length variance. No black-box LLM judging your writing."
+            body="The same features computational linguists have used for decades to study authorship - word complexity, hapax legomena, sentence-length variance. No black-box LLM judging your writing."
           />
         </div>
       </section>
@@ -316,7 +322,7 @@ export default function HomePage({ setPage }) {
             Ready to look at your writing?
           </h2>
           <p className="muted" style={{ fontSize: 16, maxWidth: 520, margin: '0 auto 24px' }}>
-            Paste an essay or a paragraph. The analyzer runs locally &mdash; nothing is stored.
+            Paste an essay or a paragraph. The analyzer runs locally - nothing is stored.
           </p>
           <button className="btn btn-primary" onClick={() => setPage('analyzer')}>
             Open the Analyzer <IcoArrow size={16} />
